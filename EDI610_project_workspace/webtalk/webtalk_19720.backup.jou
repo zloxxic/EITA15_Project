@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Webtalk v2016.1 (64-bit)
+# SW Build 1538259 on Fri Apr  8 15:45:27 MDT 2016
+# 
+# Start of session at: Mon Mar 06 11:00:26 2017
+# Process ID: 19720
+# Current directory: U:/Workspace/vivado/EDI610_demo_project_2/EDI610_demo_project_2.sdk/webtalk
+# Command line: wbtcv.exe -mode batch -source sdk_webtalk.tcl
+# Log file: U:/Workspace/vivado/EDI610_demo_project_2/EDI610_demo_project_2.sdk/webtalk/webtalk.log
+# Journal file: U:/Workspace/vivado/EDI610_demo_project_2/EDI610_demo_project_2.sdk/webtalk\webtalk.jou
+#-----------------------------------------------------------
+source sdk_webtalk.tcl

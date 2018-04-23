@@ -1,0 +1,21 @@
+10:59:30 **** Build of configuration Debug for project EDI610_demo ****
+make all 
+'Building file: ../src/platform.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/platform.o" -I../../EDI610_bsp/microblaze_0/include -mlittle-endian -mcpu=v9.6 -mxl-soft-mul -Wl,--no-relax -MMD -MP -MF"src/platform.d" -MT"src/platform.o" -o "src/platform.o" "../src/platform.c"
+'Finished building: ../src/platform.c'
+' '
+'Building target: EDI610_demo.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../EDI610_bsp/microblaze_0/lib -mlittle-endian -mcpu=v9.6 -mxl-soft-mul -Wl,--no-relax -o "EDI610_demo.elf"  ./src/helloworld.o ./src/microblaze_disable_interrupt.o ./src/microblaze_enable_interrupt.o ./src/platform.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: EDI610_demo.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size EDI610_demo.elf  |tee "EDI610_demo.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+  11832	    340	   3260	  15432	   3c48	EDI610_demo.elf
+'Finished building: EDI610_demo.elf.size'
+' '
+
+10:59:32 Build Finished (took 2s.434ms)
+

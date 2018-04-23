@@ -1,0 +1,57 @@
+15:04:31 **** Auto Build of configuration Debug for project Project_Game ****
+make all 
+'Building file: ../src/main.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/main.o" -I../../EDI610_VGA_Demo_bsp/microblaze_0/include -mlittle-endian -mcpu=v9.6 -mxl-soft-mul -Wl,--no-relax -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c: In function 'main':
+../src/main.c:80:36: warning: passing argument 3 of 'drawTexture' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+     drawTexture(xx*16+12*16, yy*16,TILE_NEUTRAL);
+                                    ^
+In file included from ../src/main.c:38:0:
+../src/vga.h:25:6: note: expected 'unsigned char *' but argument is of type 'const unsigned char *'
+ void drawTexture(unsigned int startX, unsigned int startY, unsigned char textureColor[]);
+      ^
+../src/main.c: In function 'setup':
+../src/main.c:92:2: warning: implicit declaration of function 'initTimers_Clock' [-Wimplicit-function-declaration]
+  initTimers_Clock();
+  ^
+../src/main.c:93:2: warning: implicit declaration of function 'initController_Clock' [-Wimplicit-function-declaration]
+  initController_Clock();
+  ^
+../src/main.c: At top level:
+../src/main.c:159:6: warning: conflicting types for 'initTimers_Clock'
+ void initTimers_Clock() {
+      ^
+../src/main.c:92:2: note: previous implicit declaration of 'initTimers_Clock' was here
+  initTimers_Clock();
+  ^
+../src/main.c:170:6: warning: conflicting types for 'initController_Clock'
+ void initController_Clock() {
+      ^
+../src/main.c:93:2: note: previous implicit declaration of 'initController_Clock' was here
+  initController_Clock();
+  ^
+../src/main.c: In function 'keyboardInterruptHandler':
+../src/main.c:186:6: warning: unused variable 'c' [-Wunused-variable]
+  int c, d;
+      ^
+../src/main.c: In function 'random':
+../src/main.c:157:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+'Finished building: ../src/main.c'
+' '
+'Building target: Project_Game.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../EDI610_VGA_Demo_bsp/microblaze_0/lib -mlittle-endian -mcpu=v9.6 -mxl-soft-mul -Wl,--no-relax -o "Project_Game.elf"  ./src/Board.o ./src/Tile.o ./src/displays.o ./src/main.o ./src/microBlaze.o ./src/vga.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: Project_Game.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size Project_Game.elf  |tee "Project_Game.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+  10876	    360	   4884	  16120	   3ef8	Project_Game.elf
+'Finished building: Project_Game.elf.size'
+' '
+
+15:04:35 Build Finished (took 3s.299ms)
+
