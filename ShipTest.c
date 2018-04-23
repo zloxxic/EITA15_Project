@@ -4,9 +4,12 @@
  *  Created on: 23 apr. 2018
  *      Author: os2422el-s
  */
+#include <stdio.h>
 #include "ship.h"
+#include <stdlib.h>
 
 int main(void) {
+	char randomNamn;
 	int net[10][10];
 	int i, j;
 	for (i = 0; i < 10; i++) {
@@ -51,9 +54,15 @@ int main(void) {
 	for(i = 0; i < 10; i++){
 
 		for(j = 0; j < 10; j++){
-			printf(net[i][j] + " ");
+			if(net[i][j]==0){
+				printf("a");
+			}else{
+				printf("b");
+			}
 		}
 		printf("\n");
 	}
+	Ship_destroy(ship);
+	return 0;
 }
 
