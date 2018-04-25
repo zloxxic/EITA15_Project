@@ -68,23 +68,29 @@ int main(void){
 	while(1==1){
 		displayNumber(*KB_DATA);
 		//clearScreen(COLOR_GREEN);
-		for(int yy=0;yy<20;yy++){
-			for(int xx=0;xx<20; xx++){
-				drawPixel(xx*5, yy*5, pixlar[xx][yy]);
-				//drawTexture(xx*16, yy*16,TILE_NEUTRAL);
-			}
+
+		if(x != old_x || y != old_y){
+			//reDraw();
+			drawSquare(x+2, y+2, x+13, y+13, 224);
+
+//			drawPixel(old_x, old_y, COLOR_BLACK);
+//			drawPixel(x, y, COLOR_GREEN);
+			old_x = x;
+			old_y = y;
 		}
 
-		for(int yy=0;yy<10;yy++){
-			for(int xx=0;xx<10; xx++){
-				drawTexture(xx*16+12*16, yy*16,TILE_NEUTRAL);
-			}
-		}
 
 
 	}
 }
 
+void reDraw(){
+	for (int yy = 0; yy < 10; yy++) {
+			for (int xx = 0; xx < 10; xx++) {
+				drawTexture(xx  * 16, yy * 16, TILE_NEUTRAL);
+			}
+		}
+}
 void setup(){
 	/*
 	 * Configure data direction for I/O devices
@@ -97,8 +103,8 @@ void setup(){
 	/*
 	 * Draw initial screen
 	 */
-	x = VGA_WIDTH/2;
-	y = VGA_HEIGHT/2;
+	x = 0;
+	y = 0;
 	old_x = x;
 	old_y = y;
 	clearScreen(COLOR_BLACK);
@@ -137,6 +143,15 @@ void setup(){
 			pixlar[i][j] = (i*j)/2;
 		}
 	}
+//	for (int yy = 0; yy < 20; yy++) {
+//		for (int xx = 0; xx < 20; xx++) {
+//			drawPixel(xx * 5, yy * 5, pixlar[xx][yy]);
+//			//drawTexture(xx*16, yy*16,TILE_NEUTRAL);
+//		}
+//	}
+
+	reDraw();
+	drawSquare(x+2, y+2, x+13, y+13, 224);
 
 }
 
@@ -189,23 +204,32 @@ void keyboardInterruptHandler(){
 	}
 	currentKeyCode = *KB_DATA;
 	if(lastKeyCode == currentKeyCode){
+		reDraw();
 		// Check if any of the arrows where pressed
 		switch(currentKeyCode){
 		// Scan code of up arrow is 0x75
 		case 0x75:
+			//reDraw();
 			y-=16;
+
 			break;
 		// Scan code of down arrow is 0x72
 		case 0x72:
+			//reDraw();
 			y+=16;
+
 			break;
 		// Scan code of right arrow is 0x74
 		case 0x74:
+			//reDraw();
 			x+=16;
+
 			break;
 		// Scan code of left arrow is 0x6B
 		case 0x6B:
+			//reDraw();
 			x-=16;
+
 			break;
 		default:
 			break;
