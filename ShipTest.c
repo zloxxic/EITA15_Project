@@ -9,7 +9,6 @@
 #include <stdlib.h>
 
 int main(void) {
-	char randomNamn;
 	int net[10][10];
 	int i, j;
 	for (i = 0; i < 10; i++) {
@@ -18,51 +17,75 @@ int main(void) {
 		}
 	}
 	Ship* ship = Ship_create(5, 5, 3, 2);
+	Ship* ship1 = Ship_create(0, 0, 4, 2);
 	int nY = ship->y;
 	int nX = ship->x;
+	int nY1 = ship1->y;
+	int nX1 = ship1->x;
+	int ch1, ch2;
+	ch1 = getch();
 	//net[ship->Ship_x][ship->y] = 1;
 	i = 0;
 	j = 0;
-	switch (ship->dir) {
-	case 0:
+	//kollar att x och y-värde ligger innanför matrisen, kanske inte behövs
+	if (nX < 10 && nX >= 0 && nY < 10 && nY >= 0) {
+		switch (ship1->dir) {
+		case 0:
+			//kollar att skeppet inte sträcker sig utanför matrisen
+			if (nY - ship->seg >= 0 && net[nX][nY]==0) {
+				for (i = 0; i < (ship->seg); i++) {
 
-		for (i = 0; i < (ship->seg); i++) {
-			net[ship->x][nY] = 1;
-			nY--;
-		}
-		break;
-	case 1:
+					net[nY][nX] = 1;
+					nY--;
+					net[nX1][nY1] = 1;
+					nY1--;
 
-		for (i = 0; i < (ship->seg); i++) {
-			net[nX][ship->y] = 1;
-			nX++;
+				}
+			}
+			break;
+		case 1:
+			if (nX + ship->seg < 10) {
+				for (i = 0; i < (ship->seg); i++) {
+					net[nY][nX] = 1;
+					nX++;
+				}
+			}
+			break;
+		case 2:
+			if (nY + ship->seg < 10) {
+				for (i = 0; i < (ship->seg); i++) {
+					net[nY][nX] = 1;
+					nY++;
+					net[nY1][nX1] = 1;
+					nY1++;
+				}
+			}
+			break;
+		case 3:
+			if (nX - ship->seg >= 0) {
+				for (i = 0; i < (ship->seg); i++) {
+					net[nY][nX] = 1;
+					nX--;
+					net[nY1][nX1] = 1;
+					nX1--;
+				}
+			}
+			break;
 		}
-		break;
-	case 2:
-		for (i = 0; i < (ship->seg); i++) {
-			net[ship->x][nY] = 1;
-			nY++;
-		}
-		break;
-	case 3:
-		for (i = 0; i < (ship->seg); i++) {
-			net[nX][ship->y] = 1;
-			nX--;
-		}
-		break;
 	}
-	for(i = 0; i < 10; i++){
+	for (i = 0; i < 10; i++) {
 
-		for(j = 0; j < 10; j++){
-			if(net[i][j]==0){
+		for (j = 0; j < 10; j++) {
+			if (net[i][j] == 0) {
 				printf("a");
-			}else{
+			} else {
 				printf("b");
 			}
 		}
 		printf("\n");
 	}
 	Ship_destroy(ship);
+	Ship_destroy(ship1);
 	return 0;
 }
 
