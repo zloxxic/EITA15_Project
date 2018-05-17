@@ -41,7 +41,7 @@
 #include "microBlaze.h"
 #include "textures.h"
 #include "timers.h"
-#include "timer_clock.h"
+//#include "timer_clock.h"
 
 /*
  * Global variables
@@ -61,7 +61,9 @@ unsigned char pixlar[40][40];
  */
 void buttonsInterruptHandler() __attribute__((fast_interrupt));
 void keyboardInterruptHandler() __attribute__((fast_interrupt));
+void timer1ClockInterruptHandler() __attribute__((fast_interrupt));
 void setup();
+int random(int max);
 
 int main(void){
 	setup();
@@ -71,8 +73,13 @@ int main(void){
 
 		if(x != old_x || y != old_y){
 			//reDraw();
-			drawSquare(x+2, y+2, x+13, y+13, 224);
-
+			int r = random(10);
+			for (int d = 1; d <= 12500; d++){
+					//EMPTY DELAY
+				}
+			int b = random(10);
+//			drawSquare(x+2, y+2, x+13, y+13, 224);
+			drawSquare(r*16+2, b*16+2, r*16+13, b*16+13, 224);
 //			drawPixel(old_x, old_y, COLOR_BLACK);
 //			drawPixel(x, y, COLOR_GREEN);
 			old_x = x;
@@ -97,7 +104,6 @@ void setup(){
 	 */
 	initTimers_Clock();
 	initController_Clock();
-	enableTimer1();
 	*BUTTONS_CONTROL = 0x1F;
 
 	/*
@@ -125,24 +131,27 @@ void setup(){
 	 * Configure interrupt controller
 	 */
 	*IVAR0 = (unsigned int) buttonsInterruptHandler;
+	*IVAR1 = (unsigned int) timer1ClockInterruptHandler;
 	*IVAR4 = (unsigned int) keyboardInterruptHandler;
 	*MER |= 0b11;
-	*IER = 0b10001;
+	*IER = 0b10011;
 	*IAR = 0b10001;
 
 	/*
 	 * Enable interrupts for processor
 	 */
 	enableMicroBlazeInterrupts();
+	reDraw();
+	enableTimer1();
 
 	/*
 	 * fill pixelarray
 	 */
-	for(int i =0; i < 20;i++){
-		for(int j =0; j < 20;j++){
-			pixlar[i][j] = (i*j)/2;
-		}
-	}
+//	for(int i =0; i < 20;i++){
+//		for(int j =0; j < 20;j++){
+//			pixlar[i][j] = (i*j)/2;
+//		}
+//	}
 //	for (int yy = 0; yy < 20; yy++) {
 //		for (int xx = 0; xx < 20; xx++) {
 //			drawPixel(xx * 5, yy * 5, pixlar[xx][yy]);
@@ -150,7 +159,7 @@ void setup(){
 //		}
 //	}
 
-	reDraw();
+
 	drawSquare(x+2, y+2, x+13, y+13, 224);
 
 }
@@ -168,12 +177,16 @@ void buttonsInterruptHandler(){
 
 /*returnerar heltal mellan 0 och max.(använde tiden från senaste knapptryckningen % något tills det blir mindre än max*/
 int random(int max){
-
+	int random = 0;
+	do{
+		random = timeSinceStart%10;
+	}while(random < 0 || random >= max);
+	return random;
 }
 
 void initTimers_Clock() {
-	*TIMER1_LOAD=100 - 1;
-	*TIMER1_CTRL=(1<<8)|(1<<6)|(1<<5)|(1<<4)|(1<<1);
+	*TIMER1_LOAD = 4359;
+	*TIMER1_CTRL =(1<<8)|(1<<6)|(1<<5)|(1<<4)|(1<<1);
 
 }
 
@@ -184,15 +197,15 @@ void enableTimer1() {
 
 void initController_Clock() {
 	*IER|=0b110;
-	*IVAR1=(unsigned int) timer1ClockInterruptHandler;
-	*MER|=0b11;
+
 
 }
 
 void timer1ClockInterruptHandler() {
-	*TIMER1_CTRL|=(1<<8);
 	timeSinceStart++;
-	*IAR=0b10;
+//	displayNumber(timeSinceStart);
+	*TIMER1_CTRL|=(1<<8);
+	*IAR = 1 << TIMER1_IRQ;
 }
 
 void keyboardInterruptHandler(){
