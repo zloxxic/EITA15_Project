@@ -62,7 +62,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 
 			}
 			//kollar att skeppet inte sträcker sig utanför matrisen
-			if (self->y - self->seg >= 1) {
+			if (self->y - self->seg >= 0) {
 				for (int i = 0; i < (self->seg); i++) {
 
 					m[self->y-i][self->x] = 1;
@@ -99,7 +99,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 				}
 
 			}
-			if (self->y + self->seg < 11) {
+			if (self->y + self->seg <= 11) {
 				for (int i = 0; i < (self->seg); i++) {
 					m[self->y+i][self->x] = 1;
 				}
@@ -117,7 +117,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 				}
 
 			}
-			if (self->x - self->seg >= 1) {
+			if (self->x - self->seg >= 0) {
 				for (int i = 0; i < (self->seg); i++) {
 					m[self->y][self->x-i] = 1;
 				}
@@ -125,4 +125,12 @@ void Ship_place(Ship* self, int m[12][12]) {
 			break;
 		}
 	}
+}
+/** Markerar [x][y] och sedan ska man kunna styra med piltangenterna för att öka/minska x/y. trycka enter för att bomba och om
+värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
+void Bomb(int m[12][12], int x, int y){
+	if (m[y][x]==1){
+		m[y][x]=2;
+	}
+
 }
