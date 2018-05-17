@@ -53,7 +53,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 			for (int k = self->y; k > (self->y - self->seg); k--) {
 				for (int i = k - 1; i <= k + 1; i++) {
 					for (int j = self->x - 1; j <= self->x + 1; j++) {
-						if (m[i][j] != 0) {
+						if (m[j][i] != 0) {
 							return;
 						}
 					}
@@ -65,14 +65,13 @@ void Ship_place(Ship* self, int m[12][12]) {
 			if (self->y - self->seg >= 1) {
 				for (int i = 0; i < (self->seg); i++) {
 
-					m[self->y][self->x] = 1;
-					self->y--;
+					m[self->y-i][self->x] = 1;
 				}
 			}
 			break;
 		case 1:
 			for (int k = self->x; k < (self->x + self->seg); k++) {
-				for (int i = k - 1; i <= k + 1; i++) {
+				for (int i = self->y-1; i <= self->y+1; i++) {
 					for (int j = k - 1; j <= k + 1; j++) {
 						if (m[i][j] != 0) {
 							return;
@@ -82,17 +81,16 @@ void Ship_place(Ship* self, int m[12][12]) {
 				}
 
 			}
-			if (self->x + self->seg < 11) {
+			if (self->x + self->seg <= 11) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y][self->x] = 1;
-					self->x++;
+					m[self->y][self->x+i] = 1;
 				}
 			}
 			break;
 		case 2:
 			for (int k = self->y; k < (self->y + self->seg); k++) {
 				for (int i = k - 1; i <= k + 1; i++) {
-					for (int j = k - 1; j <= k + 1; j++) {
+					for (int j = self->x - 1; j <= self->x + 1; j++) {
 						if (m[i][j] != 0) {
 							return;
 						}
@@ -103,14 +101,13 @@ void Ship_place(Ship* self, int m[12][12]) {
 			}
 			if (self->y + self->seg < 11) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y][self->x] = 1;
-					self->y++;
+					m[self->y+i][self->x] = 1;
 				}
 			}
 			break;
 		case 3:
 			for (int k = self->x; k > (self->x-self->seg); k--) {
-				for (int i = k - 1; i <= k + 1; i++) {
+				for (int i = self->y - 1; i <= self->y + 1; i++) {
 					for (int j = k - 1; j <= k + 1; j++) {
 						if (m[i][j] != 0) {
 							return;
@@ -122,8 +119,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 			}
 			if (self->x - self->seg >= 1) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y][self->x] = 1;
-					self->x--;
+					m[self->y][self->x-i] = 1;
 				}
 			}
 			break;
