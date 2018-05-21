@@ -129,8 +129,11 @@ void Ship_place(Ship* self, int m[12][12]) {
 /** Markerar [x][y] och sedan ska man kunna styra med piltangenterna för att öka/minska x/y. trycka enter för att bomba och om
 värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
 void Bomb(int m[12][12], int x, int y){
-	if (m[y][x]==1){
+	if (m[y][x]==0){
 		m[y][x]=2;
+	}
+	else if(m[y][x]==1){
+		m[y][x]=3;
 	}
 
 }
