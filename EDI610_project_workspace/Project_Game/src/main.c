@@ -64,7 +64,8 @@ unsigned long timeSinceStart = 0;
 /*
  * Spelvariabler
  */
-int net[12][12];
+int playerNet[12][12];
+int opponentNet[12][12];
 
 /*
  * Function prototypes
@@ -96,7 +97,8 @@ int main(void) {
 			drawString("Simon, Oskar, Victor, Richard", 0, 470);
 			if(menu != 0){
 				clearScreen(COLOR_BLACK);
-				placeBoard(net);
+				placeBoard(playerNet);
+				placeBoard(opponentNet);
 				reDraw();
 			}
 			break;
@@ -180,7 +182,13 @@ void setup() {
 
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
-			net[i][j] = 0;
+			playerNet[i][j] = 0;
+		}
+	}
+
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			opponentNet[i][j] = 0;
 		}
 	}
 
@@ -200,36 +208,84 @@ void reDraw(){
 	drawSquare(319, 100, 320, 480, COLOR_WHITE);
 	drawSquare(0, 100, 639, 101, COLOR_WHITE);
 
+	//Rita spelarens spelplan
 	for (int i = 1; i < 11; i++) {
 
 		for (int j = 1; j < 11; j++) {
-			if (net[i][j] == 0) {
-				drawTexture(16 * j - 16 + 16, 16 * i - 16 + 160,
+			if (playerNet[i][j] == 0) {
+				drawTexture(16 * j - 16 + 16, //x
+						16 * i - 16 + 160, //y
 						TILE_NEUTRAL);
-			} else if (net[i][j] == 1) {
-				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
-						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+			} else if (playerNet[i][j] == 1) {
+				drawSquare(16 * j - 16 + 16, //x_start
+						16 * i - 16 + 160, //y_start
+						16 * j - 16 + 15 + 16, //x_end
+						16 * i - 16 + 15 + 160, //y_end
 						73);
-			} else if (net[i][j] == 2) {
-				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
-						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+			} else if (playerNet[i][j] == 2) {
+				drawSquare(16 * j - 16 + 16, //x_start
+						16 * i - 16 + 160, //y_start
+						16 * j - 16 + 15 + 16, //x_end
+						16 * i - 16 + 15 + 160, //y_end
 						COLOR_YELLOW);
-			} else if (net[i][j] == 3) {
-				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
-						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+			} else if (playerNet[i][j] == 3) {
+				drawSquare(16 * j - 16 + 16, //x_start
+						16 * i - 16 + 160, //y_start
+						16 * j - 16 + 15 + 16, //x_end
+						16 * i - 16 + 15 + 160, //y_end
 						COLOR_WHITE);
 
 			} else {
-				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
-						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+				drawSquare(16 * j - 16 + 16, //x_start
+						16 * i - 16 + 160, //y_start
+						16 * j - 16 + 15 + 16, //x_end
+						16 * i - 16 + 15 + 160, //y_end
 						COLOR_GREEN);
 			}
 		}
 	}
+
+	//Rita opponentens spelplan
+	for (int i = 1; i < 11; i++) {
+			for (int j = 1; j < 11; j++) {
+				if (opponentNet[i][j] == 0) {
+					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
+							16 * i - 16 + 160, //y
+							TILE_NEUTRAL);
+				} else if (opponentNet[i][j] == 1) {
+					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
+							16 * i - 16 + 160, //y
+							TILE_NEUTRAL);
+				} else if (opponentNet[i][j] == 2) {
+					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
+							16 * i - 16 + 160, //y
+							TILE_NEUTRAL);
+					drawSquare(16 * j - 16 + (640 - 16 - 16*10)+4, //x_start
+							16 * i - 16 + 160+4, //y_start
+							16 * j - 16 + 7 + 4 + (640 - 16 - 16*10), //x_end
+							16 * i - 16 + 7 + 4 + 160, //y_end
+							COLOR_YELLOW);
+				} else if (opponentNet[i][j] == 3) {
+					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
+							16 * i - 16 + 160, //y_start
+							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
+							16 * i - 16 + 15 + 160, //y_end
+							COLOR_WHITE);
+
+				} else {
+					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
+							16 * i - 16 + 160, //y_start
+							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
+							16 * i - 16 + 15 + 160, //y_end
+							COLOR_GREEN);
+				}
+			}
+		}
+
 	for(int yy = 0; yy < 16; yy++){
 		for(int xx = 0; xx < 16; xx++){
 			if(yy == 0 || yy == 15 || xx == 0 || xx == 15   ){
-				drawPixel(xx+x*16 + 16, yy+y*16 + 160, COLOR_RED);
+				drawPixel(xx+x*16 + (640 - 16 - 16*10), yy+y*16 + 160, COLOR_RED);
 			}
 		}
 	}
@@ -297,31 +353,31 @@ void keyboardInterruptHandler() {
 		// Scan code of up arrow is 0x75
 		case 0x75:
 			if(y>0){
-
+				y--;
 			}
-			y = random(10,43);
+
 			break;
 			// Scan code of down arrow is 0x72
 		case 0x72:
 			if(y<9){
-
+				y++;
 			}
-			y = random(10,76);
+
 			break;
 			// Scan code of right arrow is 0x74
 		case 0x74:
 			if(x<9){
-
+				x++;
 			}
-			x = random(10,23);
+
 			break;
 			// Scan code of left arrow is 0x6B
 		case 0x6B:
 			if(x>0){
-
+				x--;
 			}
-			x = random(10,65);
-			y = random(10,36);
+			//x = random(10,65);
+			//y = random(10,36);
 			break;
 		case 0x5A:
 			if(menu == 0){
@@ -329,7 +385,7 @@ void keyboardInterruptHandler() {
 				y = 0;
 				menu = 1;
 			}else if(menu == 1){
-				Bomb(net, x+1, y+1);
+				Bomb(opponentNet, x+1, y+1);
 				scorePlayer -= 10;
 				reDraw();
 			}

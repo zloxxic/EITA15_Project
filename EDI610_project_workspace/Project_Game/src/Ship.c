@@ -6,11 +6,9 @@
  */
 
 #include "ship.h"
-#include <stdio.h>
 #include <stdlib.h>
 extern timeSinceStart;
 
-time_t t;
 
 void Ship_init(Ship* self, int x, int y, int seg, int dir) {
 	self->x = x;
@@ -136,9 +134,9 @@ char Ship_place(Ship* self, int m[12][12]) {
 	return 0;
 }
 void placeBoard(int m[12][12]) {
-	int nbr4 = 2;
-	int nbr3 = 4;
-	int nbr2 = 6;
+	int nbr4 = 1;
+	int nbr3 = 2;
+	int nbr2 = 3;
 	int slump_x, slump_y, slump_dir;
 	int temp = timeSinceStart;
 	while (nbr4 > 0) {
@@ -149,7 +147,7 @@ void placeBoard(int m[12][12]) {
 //		//timeSinceStart /= 7;
 //		temp = timeSinceStart;
 //		slump_dir = random(3,84);
-		srand((unsigned) time(&t));
+		//srand((unsigned) time(&t));
 
 		slump_x = (rand() % 10) + 1;
 		slump_y = (rand() % 10) + 1;
@@ -171,7 +169,7 @@ void placeBoard(int m[12][12]) {
 //		//timeSinceStart /= 7;
 //		temp = timeSinceStart;
 //		slump_dir = 1;
-		srand((unsigned) time(&t));
+		//srand((unsigned) time(&t));
 
 		slump_x = (rand() % 10) + 1;
 		slump_y = (rand() % 10) + 1;
@@ -192,7 +190,7 @@ void placeBoard(int m[12][12]) {
 //		slump_y = random(9,5)+1;
 //		//timeSinceStart %= 7;
 //		slump_dir = random(3,23);
-		srand((unsigned) time(&t));
+		//srand((unsigned) time(&t));
 
 		slump_x = (rand() % 10) + 1;
 		slump_y = (rand() % 10) + 1;
