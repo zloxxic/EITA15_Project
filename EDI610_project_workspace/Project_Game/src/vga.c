@@ -36,6 +36,8 @@ void drawTexture(unsigned int startX, unsigned int startY, unsigned char texture
 		}
 }
 
+
+
 void clearScreen(unsigned char bgColor){
 	drawSquare(0,0,VGA_WIDTH-1,VGA_HEIGHT-1, bgColor);
 }

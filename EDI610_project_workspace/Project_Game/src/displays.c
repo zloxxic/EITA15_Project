@@ -17,7 +17,8 @@ const unsigned int display_codes[] = {
 	0b01111101,
 	0b00000111,
 	0b01111111,
-	0b01101111
+	0b01101111,
+	0b0
 };
 
 void displayDigitAtIndex(unsigned char index, unsigned char digit) {
@@ -46,7 +47,7 @@ void displayNumber(unsigned int x) {
 }
 
 void resetDisplayAtIndex(unsigned char index){
-	displayDigitAtIndex(index, 0);
+	displayDigitAtIndex(index, 10);
 }
 
 void resetDisplays(){

@@ -33,6 +33,7 @@
 //					2: Delete "subdir.mk" located in the "Debug" folder.
 //
 
+#include <string.h>
 #include "buttons.h"
 #include "displays.h"
 #include "vga.h"
@@ -40,77 +41,105 @@
 #include "interrupt_controller.h"
 #include "microBlaze.h"
 #include "textures.h"
-#include "timers.h"
-//#include "timer_clock.h"
+#include "string.h"
+#include "ship.h"
 
 /*
  * Global variables
  */
-unsigned int x,y, old_x, old_y;
+unsigned int x = 0, y = 0, old_x, old_y;
 unsigned char color = 0;
 unsigned int bounceCounter = 0;
 
 unsigned int currentKeyCode = 0;
 unsigned int lastKeyCode = 0;
-unsigned long timeSinceStart = 0;
-unsigned char pixlar[40][40];
 
+unsigned char menu = 0;
+
+unsigned int scorePlayer = 1000;
+char scorePlayerTemp[12];
+char score[] = "Score: ";
+char scoreDef[] = "Score: ";
+/*
+ * Spelvariabler
+ */
+int net[12][12];
 
 /*
  * Function prototypes
  */
 void buttonsInterruptHandler() __attribute__((fast_interrupt));
 void keyboardInterruptHandler() __attribute__((fast_interrupt));
-void timer1ClockInterruptHandler() __attribute__((fast_interrupt));
 void setup();
-int random(int max);
 
-int main(void){
+int main(void) {
 	setup();
-	while(1==1){
-		displayNumber(*KB_DATA);
+	while (1 == 1) {
+		resetDisplays();
+		displayNumber(scorePlayer);
 		//clearScreen(COLOR_GREEN);
+		//clearScreen(COLOR_BLACK);
+		switch (menu) {
 
-		if(x != old_x || y != old_y){
-			//reDraw();
-			int r = random(10);
-			for (int d = 1; d <= 12500; d++){
-					//EMPTY DELAY
-				}
-			int b = random(10);
-//			drawSquare(x+2, y+2, x+13, y+13, 224);
-			drawSquare(r*16+2, b*16+2, r*16+13, b*16+13, 224);
-//			drawPixel(old_x, old_y, COLOR_BLACK);
-//			drawPixel(x, y, COLOR_GREEN);
-			old_x = x;
-			old_y = y;
+		//MAIN MENU
+		case 0:
+
+			drawString("Welcome to BATTLESHIPS!", 10, 10);
+			drawString("Are YOU ready for the challange of your life?", 10, 20);
+			drawString("GOOD! Press ENTER to START!", 10, 30);
+
+			drawString("Made by", 0, 460);
+			drawString("Simon, Oskar, Victor, Richard", 0, 470);
+			if(menu != 0){
+				clearScreen(COLOR_BLACK);
+			}
+			break;
+
+			//GAME
+		case 1:
+
+
+			if(x != old_x || y != old_y){
+				reDraw();
+				old_x = x;
+				old_y = y;
+			}
+
+
+			if(menu != 1){
+				clearScreen(COLOR_BLACK);
+			}
+			break;
+
+			//HIGHSCORE
+		case 2:
+			break;
+
+			//SETTINGS
+		case 3:
+			break;
+
+		default:
+			break;
+
 		}
 
-
-
+		//drawString("GAME OVER", 270, 200, charMap);
+		//drawTexture(0,0,TILE_NEUTRAL);
 	}
 }
 
-void reDraw(){
-	for (int yy = 0; yy < 10; yy++) {
-			for (int xx = 0; xx < 10; xx++) {
-				drawTexture(xx  * 16, yy * 16, TILE_NEUTRAL);
-			}
-		}
-}
-void setup(){
+void setup() {
 	/*
 	 * Configure data direction for I/O devices
 	 */
-	initTimers_Clock();
-	initController_Clock();
 	*BUTTONS_CONTROL = 0x1F;
 
 	/*
 	 * Draw initial screen
 	 */
-	x = 0;
-	y = 0;
+	//x = VGA_WIDTH / 2;
+	//y = VGA_HEIGHT / 2;
 	old_x = x;
 	old_y = y;
 	clearScreen(COLOR_BLACK);
@@ -131,40 +160,94 @@ void setup(){
 	 * Configure interrupt controller
 	 */
 	*IVAR0 = (unsigned int) buttonsInterruptHandler;
-	*IVAR1 = (unsigned int) timer1ClockInterruptHandler;
 	*IVAR4 = (unsigned int) keyboardInterruptHandler;
 	*MER |= 0b11;
-	*IER = 0b10011;
+	*IER = 0b10001;
 	*IAR = 0b10001;
 
 	/*
 	 * Enable interrupts for processor
 	 */
 	enableMicroBlazeInterrupts();
-	reDraw();
-	enableTimer1();
 
-	/*
-	 * fill pixelarray
-	 */
-//	for(int i =0; i < 20;i++){
-//		for(int j =0; j < 20;j++){
-//			pixlar[i][j] = (i*j)/2;
-//		}
-//	}
-//	for (int yy = 0; yy < 20; yy++) {
-//		for (int xx = 0; xx < 20; xx++) {
-//			drawPixel(xx * 5, yy * 5, pixlar[xx][yy]);
-//			//drawTexture(xx*16, yy*16,TILE_NEUTRAL);
-//		}
-//	}
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			net[i][j] = 0;
+		}
+	}
 
+	Ship* ship = Ship_create(1, 10, 10, 0);
+	Ship* ship1 = Ship_create(3, 1, 6, 1);
+	Ship* ship2 = Ship_create(10, 1, 10, 2);
+	Ship* ship3 = Ship_create(8, 10, 6, 3);
 
-	drawSquare(x+2, y+2, x+13, y+13, 224);
+	Ship_place(ship, net);
+	Ship_place(ship1, net);
+	Ship_place(ship2, net);
+	Ship_place(ship3, net);
+
+	Bomb(net, 1, 1);
+	Bomb(net, 1, 2);
+	Bomb(net, 1, 3);
+	Bomb(net, 1, 4);
+	Bomb(net, 1, 5);
+	Bomb(net, 1, 6);
+	Bomb(net, 1, 7);
+	Bomb(net, 1, 8);
+	Bomb(net, 1, 9);
+	Bomb(net, 1, 10);
+	Bomb(net, 1, 11);
 
 }
 
-void buttonsInterruptHandler(){
+void reDraw(){
+	drawSquare(16, 150, 160, 158, COLOR_BLACK);
+	sprintf(scorePlayerTemp, "%d", scorePlayer);
+
+	strcpy(score, scoreDef);
+	drawString("Round 12", 16, 130);
+	drawString(strcat(score, scorePlayerTemp), 16, 150);
+	drawString("Score: 1337", (640 - 16 * 11), 150);
+
+	drawSquare(319, 100, 320, 480, COLOR_WHITE);
+	drawSquare(0, 100, 639, 101, COLOR_WHITE);
+
+	for (int i = 1; i < 11; i++) {
+
+		for (int j = 1; j < 11; j++) {
+			if (net[i][j] == 0) {
+				drawTexture(16 * j - 16 + 16, 16 * i - 16 + 160,
+						TILE_NEUTRAL);
+			} else if (net[i][j] == 1) {
+				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
+						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+						73);
+			} else if (net[i][j] == 2) {
+				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
+						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+						COLOR_YELLOW);
+			} else if (net[i][j] == 3) {
+				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
+						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+						COLOR_WHITE);
+
+			} else {
+				drawSquare(16 * j - 16 + 16, 16 * i - 16 + 160,
+						16 * j - 16 + 15 + 16, 16 * i - 16 + 15 + 160,
+						COLOR_GREEN);
+			}
+		}
+	}
+	for(int yy = 0; yy < 16; yy++){
+		for(int xx = 0; xx < 16; xx++){
+			if(yy == 0 || yy == 15 || xx == 0 || xx == 15   ){
+				drawPixel(xx+x*16 + 16, yy+y*16 + 160, COLOR_RED);
+			}
+		}
+	}
+}
+
+void buttonsInterruptHandler() {
 	// increment button interrupt counter. Note that a single press of a button can generate
 	// multiple interrupts due to bouncing.
 	bounceCounter = bounceCounter + 1;
@@ -175,73 +258,54 @@ void buttonsInterruptHandler(){
 
 }
 
-/*returnerar heltal mellan 0 och max.(använde tiden från senaste knapptryckningen % något tills det blir mindre än max*/
-int random(int max){
-	int random = 0;
-	do{
-		random = timeSinceStart%10;
-	}while(random < 0 || random >= max);
-	return random;
-}
-
-void initTimers_Clock() {
-	*TIMER1_LOAD = 4359;
-	*TIMER1_CTRL =(1<<8)|(1<<6)|(1<<5)|(1<<4)|(1<<1);
-
-}
-
-void enableTimer1() {
-	*TIMER1_CTRL=(*TIMER1_CTRL|(1<<7))&(~(1<<5));
-
-}
-
-void initController_Clock() {
-	*IER|=0b110;
-
-
-}
-
-void timer1ClockInterruptHandler() {
-	timeSinceStart++;
-//	displayNumber(timeSinceStart);
-	*TIMER1_CTRL|=(1<<8);
-	*IAR = 1 << TIMER1_IRQ;
-}
-
-void keyboardInterruptHandler(){
+void keyboardInterruptHandler() {
 	// Read the newly received scan code
 	lastKeyCode = *KB_DATA;
-	int c, d;
-	for (d = 1; d <= 12500; d++){
+	int d;
+	for (d = 1; d <= 12500; d++) {
 		//EMPTY DELAY
 	}
 	currentKeyCode = *KB_DATA;
-	if(lastKeyCode == currentKeyCode){
-		reDraw();
+	if (lastKeyCode == currentKeyCode) {
 		// Check if any of the arrows where pressed
-		switch(currentKeyCode){
+		switch (currentKeyCode) {
 		// Scan code of up arrow is 0x75
 		case 0x75:
-			//reDraw();
-			y-=16;
-
+			if(y>0)
+			y -= 1;
 			break;
-		// Scan code of down arrow is 0x72
+			// Scan code of down arrow is 0x72
 		case 0x72:
-			//reDraw();
-			y+=16;
-
+			if(y<9)
+			y += 1;
 			break;
-		// Scan code of right arrow is 0x74
+			// Scan code of right arrow is 0x74
 		case 0x74:
-			//reDraw();
-			x+=16;
+			if(x<9)
+			x += 1;
+			break;
+			// Scan code of left arrow is 0x6B
+		case 0x6B:
+			if(x>0)
+			x -= 1;
+			break;
+		case 0x5A:
+			if(menu == 0){
+				x = 0;
+				y = 0;
+				menu = 1;
+				reDraw();
+			}else if(menu == 1){
+				Bomb(net, x+1, y+1);
+				scorePlayer -= 10;
+				reDraw();
+			}
 
 			break;
-		// Scan code of left arrow is 0x6B
-		case 0x6B:
-			//reDraw();
-			x-=16;
+		case 0x76:
+			if(menu == 1){
+				menu = 0;
+			}
 
 			break;
 		default:
