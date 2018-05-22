@@ -58,7 +58,9 @@ unsigned int lastKeyCode = 0;
 unsigned char menu = 0;
 
 unsigned int scorePlayer = 1000;
+unsigned int scoreOpponent = 1000;
 char scorePlayerTemp[12];
+char scoreOpponentTemp[12];
 
 unsigned long timeSinceStart = 0;
 /*
@@ -198,12 +200,15 @@ void setup() {
 
 void reDraw(){
 	drawSquare(16, 150, 160, 158, COLOR_BLACK);
+	drawSquare(620-16*8, 150, 620-16*4, 158, COLOR_BLACK);
 	sprintf(scorePlayerTemp, "%d", scorePlayer);
+	sprintf(scoreOpponentTemp, "%d", scoreOpponent);
 
 	drawString("Round 12", 16, 130);
-	drawString("Score ", 16, 150);
-	drawString(scorePlayerTemp, 75, 150);
-	drawString("Score: 1337", (640 - 16 * 11), 150);
+	drawString("Score: ", 16, 150);
+	drawString(scorePlayerTemp, 70, 150);
+	drawString("Score: ", (640 - 16 * 11), 150);
+	drawString(scoreOpponentTemp, 620-(16*7)+10, 150);
 
 	drawSquare(319, 100, 320, 480, COLOR_WHITE);
 	drawSquare(0, 100, 639, 101, COLOR_WHITE);
@@ -385,8 +390,16 @@ void keyboardInterruptHandler() {
 				y = 0;
 				menu = 1;
 			}else if(menu == 1){
+				if(opponentNet[x+1][y+1] == 0){
+					scorePlayer -= 10;
+				}
 				Bomb(opponentNet, x+1, y+1);
-				scorePlayer -= 10;
+				if(playerNet[x+1][y+1] == 0){
+					scoreOpponent -= 10;
+				}
+				Bomb(playerNet, x+1, y+1);
+
+
 				reDraw();
 			}
 

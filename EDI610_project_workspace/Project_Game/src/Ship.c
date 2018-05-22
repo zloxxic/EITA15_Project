@@ -139,6 +139,7 @@ void placeBoard(int m[12][12]) {
 	int nbr2 = 3;
 	int slump_x, slump_y, slump_dir;
 	int temp = timeSinceStart;
+	srand(temp);
 	while (nbr4 > 0) {
 //		slump_x = random(9,47)+1;
 //		//timeSinceStart /= 7;
