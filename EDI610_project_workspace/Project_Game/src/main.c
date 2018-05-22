@@ -38,6 +38,7 @@
 #include "displays.h"
 #include "vga.h"
 #include "keyboard.h"
+#include "timers.h"
 #include "interrupt_controller.h"
 #include "microBlaze.h"
 #include "textures.h"
@@ -58,8 +59,8 @@ unsigned char menu = 0;
 
 unsigned int scorePlayer = 1000;
 char scorePlayerTemp[12];
-char score[] = "Score: ";
-char scoreDef[] = "Score: ";
+
+unsigned long timeSinceStart = 0;
 /*
  * Spelvariabler
  */
@@ -70,13 +71,16 @@ int net[12][12];
  */
 void buttonsInterruptHandler() __attribute__((fast_interrupt));
 void keyboardInterruptHandler() __attribute__((fast_interrupt));
+void timer1ClockInterruptHandler() __attribute__((fast_interrupt));
+
 void setup();
+int random(int max,int seed);
 
 int main(void) {
 	setup();
 	while (1 == 1) {
 		resetDisplays();
-		displayNumber(scorePlayer);
+		displayNumber(timeSinceStart);
 		//clearScreen(COLOR_GREEN);
 		//clearScreen(COLOR_BLACK);
 		switch (menu) {
@@ -92,6 +96,8 @@ int main(void) {
 			drawString("Simon, Oskar, Victor, Richard", 0, 470);
 			if(menu != 0){
 				clearScreen(COLOR_BLACK);
+				placeBoard(net);
+				reDraw();
 			}
 			break;
 
@@ -106,9 +112,7 @@ int main(void) {
 			}
 
 
-			if(menu != 1){
-				clearScreen(COLOR_BLACK);
-			}
+
 			break;
 
 			//HIGHSCORE
@@ -134,7 +138,8 @@ void setup() {
 	 * Configure data direction for I/O devices
 	 */
 	*BUTTONS_CONTROL = 0x1F;
-
+	initTimers_Clock();
+	initController_Clock();
 	/*
 	 * Draw initial screen
 	 */
@@ -160,15 +165,18 @@ void setup() {
 	 * Configure interrupt controller
 	 */
 	*IVAR0 = (unsigned int) buttonsInterruptHandler;
+	*IVAR1 = (unsigned int) timer1ClockInterruptHandler;
 	*IVAR4 = (unsigned int) keyboardInterruptHandler;
 	*MER |= 0b11;
-	*IER = 0b10001;
+	*IER = 0b10011;
 	*IAR = 0b10001;
 
 	/*
 	 * Enable interrupts for processor
 	 */
 	enableMicroBlazeInterrupts();
+	enableTimer1();
+
 
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
@@ -176,27 +184,7 @@ void setup() {
 		}
 	}
 
-	Ship* ship = Ship_create(1, 10, 10, 0);
-	Ship* ship1 = Ship_create(3, 1, 6, 1);
-	Ship* ship2 = Ship_create(10, 1, 10, 2);
-	Ship* ship3 = Ship_create(8, 10, 6, 3);
 
-	Ship_place(ship, net);
-	Ship_place(ship1, net);
-	Ship_place(ship2, net);
-	Ship_place(ship3, net);
-
-	Bomb(net, 1, 1);
-	Bomb(net, 1, 2);
-	Bomb(net, 1, 3);
-	Bomb(net, 1, 4);
-	Bomb(net, 1, 5);
-	Bomb(net, 1, 6);
-	Bomb(net, 1, 7);
-	Bomb(net, 1, 8);
-	Bomb(net, 1, 9);
-	Bomb(net, 1, 10);
-	Bomb(net, 1, 11);
 
 }
 
@@ -204,9 +192,9 @@ void reDraw(){
 	drawSquare(16, 150, 160, 158, COLOR_BLACK);
 	sprintf(scorePlayerTemp, "%d", scorePlayer);
 
-	strcpy(score, scoreDef);
 	drawString("Round 12", 16, 130);
-	drawString(strcat(score, scorePlayerTemp), 16, 150);
+	drawString("Score ", 16, 150);
+	drawString(scorePlayerTemp, 75, 150);
 	drawString("Score: 1337", (640 - 16 * 11), 150);
 
 	drawSquare(319, 100, 320, 480, COLOR_WHITE);
@@ -247,6 +235,43 @@ void reDraw(){
 	}
 }
 
+/*returnerar heltal mellan 0 och max.(använde tiden från senaste knapptryckningen % något tills det blir mindre än max*/
+int random(int max,int seed){
+	int random = timeSinceStart*7*seed;
+	if(random <0)
+		random*=-1;
+	do{
+		random %= 10;
+	}while(random < 0 || random > max);
+	return random;
+}
+
+void initTimers_Clock() {
+	*TIMER1_LOAD = 359;
+	*TIMER1_CTRL =(1<<8)|(1<<6)|(1<<5)|(1<<4)|(1<<1);
+
+}
+
+void enableTimer1() {
+	*TIMER1_CTRL=(*TIMER1_CTRL|(1<<7))&(~(1<<5));
+
+}
+
+void initController_Clock() {
+	*IER|=0b110;
+
+
+}
+
+void timer1ClockInterruptHandler() {
+
+	timeSinceStart++;
+	//displayNumber(timeSinceStart);
+	*TIMER1_CTRL|=(1<<8);
+
+	*IAR = 1 << TIMER1_IRQ;
+}
+
 void buttonsInterruptHandler() {
 	// increment button interrupt counter. Note that a single press of a button can generate
 	// multiple interrupts due to bouncing.
@@ -271,30 +296,38 @@ void keyboardInterruptHandler() {
 		switch (currentKeyCode) {
 		// Scan code of up arrow is 0x75
 		case 0x75:
-			if(y>0)
-			y -= 1;
+			if(y>0){
+
+			}
+			y = random(10,43);
 			break;
 			// Scan code of down arrow is 0x72
 		case 0x72:
-			if(y<9)
-			y += 1;
+			if(y<9){
+
+			}
+			y = random(10,76);
 			break;
 			// Scan code of right arrow is 0x74
 		case 0x74:
-			if(x<9)
-			x += 1;
+			if(x<9){
+
+			}
+			x = random(10,23);
 			break;
 			// Scan code of left arrow is 0x6B
 		case 0x6B:
-			if(x>0)
-			x -= 1;
+			if(x>0){
+
+			}
+			x = random(10,65);
+			y = random(10,36);
 			break;
 		case 0x5A:
 			if(menu == 0){
 				x = 0;
 				y = 0;
 				menu = 1;
-				reDraw();
 			}else if(menu == 1){
 				Bomb(net, x+1, y+1);
 				scorePlayer -= 10;
@@ -305,6 +338,8 @@ void keyboardInterruptHandler() {
 		case 0x76:
 			if(menu == 1){
 				menu = 0;
+				clearScreen(COLOR_BLACK);
+				scorePlayer = 1000;
 			}
 
 			break;

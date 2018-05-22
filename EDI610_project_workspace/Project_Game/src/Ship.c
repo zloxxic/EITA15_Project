@@ -6,7 +6,11 @@
  */
 
 #include "ship.h"
+#include <stdio.h>
 #include <stdlib.h>
+extern timeSinceStart;
+
+time_t t;
 
 void Ship_init(Ship* self, int x, int y, int seg, int dir) {
 	self->x = x;
@@ -44,7 +48,7 @@ int Ship_dir(Ship* self) {
 	return self->dir;
 }
 
-void Ship_place(Ship* self, int m[12][12]) {
+char Ship_place(Ship* self, int m[12][12]) {
 	// Kollar att båten ligger innanför matrisen
 	if (self->x < 11 && self->x >= 1 && self->y < 11 && self->y >= 1) {
 		switch (self->dir) {
@@ -54,7 +58,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 				for (int i = k - 1; i <= k + 1; i++) {
 					for (int j = self->x - 1; j <= self->x + 1; j++) {
 						if (m[j][i] != 0) {
-							return;
+							return 0;
 						}
 					}
 
@@ -65,16 +69,17 @@ void Ship_place(Ship* self, int m[12][12]) {
 			if (self->y - self->seg >= 0) {
 				for (int i = 0; i < (self->seg); i++) {
 
-					m[self->y-i][self->x] = 1;
+					m[self->y - i][self->x] = 1;
 				}
+				return 1;
 			}
 			break;
 		case 1:
 			for (int k = self->x; k < (self->x + self->seg); k++) {
-				for (int i = self->y-1; i <= self->y+1; i++) {
+				for (int i = self->y - 1; i <= self->y + 1; i++) {
 					for (int j = k - 1; j <= k + 1; j++) {
 						if (m[i][j] != 0) {
-							return;
+							return 0;
 						}
 					}
 
@@ -83,8 +88,9 @@ void Ship_place(Ship* self, int m[12][12]) {
 			}
 			if (self->x + self->seg <= 11) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y][self->x+i] = 1;
+					m[self->y][self->x + i] = 1;
 				}
+				return 1;
 			}
 			break;
 		case 2:
@@ -92,7 +98,7 @@ void Ship_place(Ship* self, int m[12][12]) {
 				for (int i = k - 1; i <= k + 1; i++) {
 					for (int j = self->x - 1; j <= self->x + 1; j++) {
 						if (m[i][j] != 0) {
-							return;
+							return 0;
 						}
 					}
 
@@ -101,16 +107,17 @@ void Ship_place(Ship* self, int m[12][12]) {
 			}
 			if (self->y + self->seg <= 11) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y+i][self->x] = 1;
+					m[self->y + i][self->x] = 1;
 				}
+				return 1;
 			}
 			break;
 		case 3:
-			for (int k = self->x; k > (self->x-self->seg); k--) {
+			for (int k = self->x; k > (self->x - self->seg); k--) {
 				for (int i = self->y - 1; i <= self->y + 1; i++) {
 					for (int j = k - 1; j <= k + 1; j++) {
 						if (m[i][j] != 0) {
-							return;
+							return 0;
 						}
 					}
 
@@ -119,21 +126,95 @@ void Ship_place(Ship* self, int m[12][12]) {
 			}
 			if (self->x - self->seg >= 0) {
 				for (int i = 0; i < (self->seg); i++) {
-					m[self->y][self->x-i] = 1;
+					m[self->y][self->x - i] = 1;
 				}
+				return 1;
 			}
 			break;
 		}
 	}
+	return 0;
+}
+void placeBoard(int m[12][12]) {
+	int nbr4 = 2;
+	int nbr3 = 4;
+	int nbr2 = 6;
+	int slump_x, slump_y, slump_dir;
+	int temp = timeSinceStart;
+	while (nbr4 > 0) {
+//		slump_x = random(9,47)+1;
+//		//timeSinceStart /= 7;
+//		temp = timeSinceStart;
+//		slump_y = random(9,31)+1;
+//		//timeSinceStart /= 7;
+//		temp = timeSinceStart;
+//		slump_dir = random(3,84);
+		srand((unsigned) time(&t));
+
+		slump_x = (rand() % 10) + 1;
+		slump_y = (rand() % 10) + 1;
+		slump_dir = rand() % 4;
+		Ship* tempShip = Ship_create(slump_x, slump_y, 4, slump_dir);
+		char tempel = Ship_place(tempShip, m);
+		if (tempel == 1) {
+			nbr4--;
+		} else {
+			Ship_destroy(tempShip);
+		}
+		//timeSinceStart /= 7;
+		temp = timeSinceStart;
+	}
+	while (nbr3 > 0) {
+//		slump_x = random(9,37)+1;
+//		//timeSinceStart /= 7;
+//		slump_y = random(9,34)+1;
+//		//timeSinceStart /= 7;
+//		temp = timeSinceStart;
+//		slump_dir = 1;
+		srand((unsigned) time(&t));
+
+		slump_x = (rand() % 10) + 1;
+		slump_y = (rand() % 10) + 1;
+		slump_dir = rand() % 4;
+		Ship* tempShip = Ship_create(slump_x, slump_y, 3, slump_dir);
+		char tempel = Ship_place(tempShip, m);
+		if (tempel == 1) {
+			nbr3--;
+		} else {
+			Ship_destroy(tempShip);
+		}
+		//timeSinceStart /= 7;
+		temp = timeSinceStart;
+	}
+	while (nbr2 > 0) {
+//		slump_x = random(9,14)+1;
+//		//timeSinceStart %= 7;
+//		slump_y = random(9,5)+1;
+//		//timeSinceStart %= 7;
+//		slump_dir = random(3,23);
+		srand((unsigned) time(&t));
+
+		slump_x = (rand() % 10) + 1;
+		slump_y = (rand() % 10) + 1;
+		slump_dir = rand() % 4;
+		Ship* tempShip = Ship_create(slump_x, slump_y, 2, slump_dir);
+		char tempel = Ship_place(tempShip, m);
+		if (tempel == 1) {
+			nbr2--;
+		} else {
+			Ship_destroy(tempShip);
+		}
+		//timeSinceStart %= 7;
+		temp = timeSinceStart;
+	}
 }
 /** Markerar [x][y] och sedan ska man kunna styra med piltangenterna för att öka/minska x/y. trycka enter för att bomba och om
-värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
-void Bomb(int m[12][12], int x, int y){
-	if (m[y][x]==0){
-		m[y][x]=2;
-	}
-	else if(m[y][x]==1){
-		m[y][x]=3;
+ värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
+void Bomb(int m[12][12], int x, int y) {
+	if (m[y][x] == 0) {
+		m[y][x] = 2;
+	} else if (m[y][x] == 1) {
+		m[y][x] = 3;
 	}
 
 }
