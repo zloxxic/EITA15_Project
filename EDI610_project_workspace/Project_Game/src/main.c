@@ -171,6 +171,7 @@ int main(void) {
 			drawString("You defended Östersjön from the Ryssland!", 10, 20);
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
+			drawString("Press ENTER to continue", 10, 50);
 			drawString(scorePlayerTemp, 146, 30);
 
 			if(menu != 2){
@@ -186,6 +187,7 @@ int main(void) {
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
 			drawString(scorePlayerTemp, 146, 30);
+			drawString("Press ENTER to continue", 10, 50);
 			if(menu != 3){
 				clearScreen(COLOR_BLACK);
 			}
@@ -197,6 +199,7 @@ int main(void) {
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
 			drawString(scorePlayerTemp, 146, 30);
+			drawString("Press ENTER to continue", 10, 50);
 			if(menu != 4){
 				clearScreen(COLOR_BLACK);
 			}
@@ -211,6 +214,7 @@ int main(void) {
 
 			drawString("Game", 34, 10);
 			drawString("Score", 94, 10);
+			drawString("Press ESC to Exit", 10, 20+10*10+20);
 			if(menu != 5){
 				clearScreen(COLOR_BLACK);
 			}
