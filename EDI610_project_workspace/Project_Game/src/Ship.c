@@ -11,7 +11,7 @@
 #include "displays.h"
 extern timeSinceStart;
 
-
+// Initializes what attributes a "Ship" has//
 void Ship_init(Ship* self, int x, int y, int seg, int dir) {
 	self->x = x;
 	self->y = y;
@@ -19,6 +19,7 @@ void Ship_init(Ship* self, int x, int y, int seg, int dir) {
 	self->dir = dir;
 }
 
+// Creates an pointer which kind of works like an object
 Ship* Ship_create(int x, int y, int seg, int dir) {
 	Ship* res = (Ship*) malloc(sizeof(Ship));
 	Ship_init(res, x, y, seg, dir);
@@ -28,6 +29,7 @@ Ship* Ship_create(int x, int y, int seg, int dir) {
 void Ship_reset(Ship* self) {
 }
 
+//Garbage collector
 void Ship_destroy(Ship* ship) {
 	if (ship) {
 		Ship_reset(ship);
@@ -35,25 +37,47 @@ void Ship_destroy(Ship* ship) {
 	}
 }
 
+// Returns the ship self's start x coordinate
 int Ship_x(Ship* self) {
 	return self->x;
 }
+
+// Returns the ship self's start y coordinate
 int Ship_y(Ship* self) {
 	return self->y;
 }
+
+// Returns the length of ship self
 int Ship_seg(Ship* self) {
 	return self->seg;
 }
+
+/** Returns the direction of the ship, where
+ * 0 is UP
+ * 1 is RIGHT
+ * 2 is DOWN
+ * 3 is LEFT
+ */
 int Ship_dir(Ship* self) {
 	return self->dir;
 }
 
+// Places a ship in the net m
 char Ship_place(Ship* self, int m[12][12]) {
-	// Kollar att båten ligger innanför matrisen
+
+	// Checks that the boats start position is within the net
 	if (self->x < 11 && self->x >= 1 && self->y < 11 && self->y >= 1) {
+
+		// Different cases for each direction
 		switch (self->dir) {
+
+		// Up
 		case 0:
-			//Kollar att alla platser båten kommer ligga på är 0:or
+
+			/** Checks where the boat is placed that it isn't going to collide with other boats, and that
+			 * each spot is only going to have water as a neighbour, one of the terms of the game
+			 * same for every direction
+			 */
 			for (int k = self->y; k > (self->y - self->seg); k--) {
 				for (int i = k - 1; i <= k + 1; i++) {
 					for (int j = self->x - 1; j <= self->x + 1; j++) {
@@ -65,7 +89,10 @@ char Ship_place(Ship* self, int m[12][12]) {
 				}
 
 			}
-			//kollar att skeppet inte sträcker sig utanför matrisen
+			/** Checks that the boat isn't stretching out of the net, and if it is not, the values of the net
+			 *  changes at where the boat is placed.
+			 *  Same for every direction
+			 */
 			if (self->y - self->seg >= 0) {
 				for (int i = 0; i < (self->seg); i++) {
 
@@ -135,11 +162,17 @@ char Ship_place(Ship* self, int m[12][12]) {
 	}
 	return 0;
 }
+
+// Fills the net m with boats. Nbr4 is a four-length ship, nbr3 is a three-length ship etc.
 void placeBoard(int m[12][12]) {
+
+	// Amount of boats of each length between two and four
 	int nbr4 = 1;
 	int nbr3 = 2;
 	int nbr2 = 3;
 	int slump_x, slump_y, slump_dir;
+
+	// Tries to place a four-length ship until it works.
 	while (nbr4 > 0) {
 		slump_x = (random()%10)+1;
 		slump_y = ((random()/10)%10)+1;
@@ -155,6 +188,8 @@ void placeBoard(int m[12][12]) {
 			Ship_destroy(tempShip);
 		}
 	}
+
+	// Tries to place two three-length boats until it works
 	while (nbr3 > 0) {
 		slump_x = (random()%10)+1;
 		slump_y = ((random()/10)%10)+1;
@@ -164,10 +199,13 @@ void placeBoard(int m[12][12]) {
 		char tempel = Ship_place(tempShip, m);
 		if (tempel == 1) {
 			nbr3--;
+			Ship_destroy(tempShip);
 		} else {
 			Ship_destroy(tempShip);
 		}
 	}
+
+	// Tries to place three two-length boats until  it works
 	while (nbr2 > 0) {
 		slump_x = (random()%10)+1;
 		slump_y = ((random()/10)%10)+1;
@@ -177,13 +215,19 @@ void placeBoard(int m[12][12]) {
 		char tempel = Ship_place(tempShip, m);
 		if (tempel == 1) {
 			nbr2--;
+			Ship_destroy(tempShip);
 		} else {
 			Ship_destroy(tempShip);
 		}
 	}
 }
-/** Markerar [x][y] och sedan ska man kunna styra med piltangenterna för att öka/minska x/y. trycka enter för att bomba och om
- värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
+
+/** Bombs the net m in the coordinates with the coordinates x and y m[y][x] changes value depending on what it is
+ * 0 is water and changes to 2 for a miss
+ * 1 is boat and changes to 3 for a hit
+ * uses checkIfBlown to change values for a full hit boat to 4's in the net
+ * if user or computer tries to bomb an already bombed spot it returns 0, else 1
+ */
 char Bomb(int m[12][12], int x, int y) {
 	if (m[y][x] == 0) {
 		m[y][x] = 2;
@@ -197,6 +241,10 @@ char Bomb(int m[12][12], int x, int y) {
 	}
 	return 0;
 }
+
+/** Checks if an entire ship is hit, changes the values for the sunken boat in the net m
+ * Is being used in method Bomb
+ */
 void checkIfBlown(int m[12][12], int y, int x){
 	int upp = 0;
 	int ner = 0;
