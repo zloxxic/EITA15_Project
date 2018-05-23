@@ -8,6 +8,6 @@
 #ifndef SRC_GUESSINDEX_H_
 #define SRC_GUESSINDEX_H_
 
-void guessIndex(char spelPlan[12][12]);
+void guessIndex(int spelPlan[12][12]);
 
 #endif /* SRC_GUESSINDEX_H_ */

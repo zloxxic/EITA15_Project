@@ -21,11 +21,13 @@ void Ship_destroy(Ship* self);
 char Ship_place(Ship* self, int m[12][12]);
 char Bomb(int m[12][12], int x, int y);
 void placeBoard(int m[12][12]);
+void checkIfBlown(int m[12][12], int y, int x);
 
 int Ship_x(Ship* self);
 int Ship_y(Ship* self);
 int Ship_seg(Ship* self);
 int Ship_dir(Ship* self);
+
 
 
 #endif /* SRC_SHIP_H_ */

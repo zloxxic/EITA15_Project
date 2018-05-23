@@ -18,11 +18,11 @@ const unsigned int display_codes[] = {
 	0b00000111,
 	0b01111111,
 	0b01101111,
-	0b0
+	0b00000000
 };
 
 void displayDigitAtIndex(unsigned char index, unsigned char digit) {
-	if ((index < 8) && (digit < 10))
+	if ((index < 8) && (digit < 11))
 		*((unsigned int *) (SEVEN_SEGMENT_DISPLAY_BASE + index * 4)) =
 				display_codes[digit];
 }
