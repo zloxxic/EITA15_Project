@@ -25,6 +25,11 @@ void drawSquare(unsigned int startX, unsigned int startY, unsigned int endX, uns
 	}
 }
 
+
+/*
+ * Draw a texture by using an array of colors (stored in textures.h) then
+ * drawing them pixel-by-pixel
+ */
 void drawTexture(unsigned int startX, unsigned int startY, unsigned char textureColor[]){
 	int i, j;
 	unsigned char index = 0;
