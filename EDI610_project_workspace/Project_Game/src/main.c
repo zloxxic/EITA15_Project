@@ -49,38 +49,46 @@
 /*
  * Global variables
  */
+//Currently pressed button on FPGA
 unsigned int currentButtonsState = 0;
+//Previously pressed button on FPGA
 unsigned int prevButtonsState = 0;
 
+//Coordinates for cursor
 unsigned int x = 0, y = 0, old_x, old_y;
-unsigned char color = 0;
-unsigned int bounceCounter = 0;
 
+//Currently pressed key on keyboard
 unsigned int currentKeyCode = 0;
+//Previously pressed key on keyboard
 unsigned int lastKeyCode = 0;
 
+//Menu variable used to navigate game
 unsigned char menu = 0;
+
+//Variable used to toggle if it's players turn
 unsigned char player = 0;
-unsigned char computer = 0;
 
+//Score for player (Default 1000)
 unsigned int scorePlayer;
-unsigned int scoreOpponent;
+//Life for player (Default 16)
 unsigned char lifePlayer;
+//Life for opponent (Default 16)
 unsigned char lifeOpponent;
-char scorePlayerTemp[12];
-char scoreOpponentTemp[12];
-char lifePlayerTemp[12];
-char lifeOpponentTemp[12];
 
-unsigned int highScore[10];
+//Variables used to convert INT to String/char-array
+unsigned char scorePlayerTemp[12];
+unsigned char lifePlayerTemp[12];
+unsigned char lifeOpponentTemp[12];
 unsigned char highTemp[12];
 unsigned char roundTemp[12];
-unsigned char turn = 0;
+
+//Stores the scores from the last games
+unsigned int highScore[10];
+unsigned char round = 0;
 
 unsigned long timeSinceStart = 0;
-/*
- * Spelvariabler
- */
+
+//Nets for storing where boats are and what tiles are hit etc.
 int playerNet[12][12];
 int opponentNet[12][12];
 
@@ -91,6 +99,9 @@ void buttonsInterruptHandler() __attribute__((fast_interrupt));
 void keyboardInterruptHandler() __attribute__((fast_interrupt));
 void timer1ClockInterruptHandler() __attribute__((fast_interrupt));
 
+/*
+ * Init functions
+ */
 void setup();
 int random();
 void resetStats();
@@ -98,6 +109,8 @@ void resetStats();
 int main(void) {
 	setup();
 	while (1 == 1) {
+
+		//Removes unused displays when displaying scorePlayer.
 		if(scorePlayer<1000){
 			resetDisplayAtIndex(3);
 		}
@@ -108,36 +121,61 @@ int main(void) {
 			resetDisplayAtIndex(1);
 			resetDisplayAtIndex(0);
 		}
-
+		displayNumber(scorePlayer);
 		//displayNumber(timeSinceStart);
 		//displayNumber(currentKeyCode);
-		displayNumber(scorePlayer);
 
+		/*
+		 * Switch for all different screens and modes in the game
+		 * 0 - Main menu
+		 * 1 - Game
+		 * 2 - Match won
+		 * 3 - Match lost
+		 * 4 - Match tie
+		 * 5 - Highscore
+		 *
+		 * **States often changed in interrupts**
+		 */
 		switch (menu) {
 
-		//MAIN MENU
+		/*
+		 * MAIN MENU
+		 *
+		 * Used to display welcome text and to start the game (or highscore)
+		 */
 		case 0:
 
+			//Welcome text displayed in the top left corner
 			drawString("Welcome to BATTLESHIPS!", 10, 10);
 			drawString("Are YOU ready for the challenge of your life?", 10, 20);
 			drawString("GOOD! Press ENTER to START!", 10, 30);
 			drawString("Press 'H' for highscore", 10, 50);
 
+			//Credit text displayed in the bottom left corner
 			drawString("Made by", 0, 460);
 			drawString("Simon, Oskar, Victor, Richard", 0, 470);
+
+			//If the menu changes from 0 to 1 (enters game-mode)
 			if(menu == 1){
 				clearScreen(COLOR_BLACK);
 				placeBoard(playerNet);
 				placeBoard(opponentNet);
 				reDraw();
-			}else if(menu == 5){
+			}
+			//If the menu changes to Highscore-menu
+			else if(menu == 5){
 				clearScreen(COLOR_BLACK);
 			}
 			break;
 
-			//GAME
+			/*
+			 * GAME MENU
+			 *
+			 * Everything regarding the game runs from here
+			 */
 		case 1:
 
+			//if the previous key is 'R' then do
 			if(lastKeyCode == 0x2d ){
 				placeBoard(playerNet);
 				placeBoard(opponentNet);
@@ -145,17 +183,22 @@ int main(void) {
 				reDraw();
 			}
 
+			//if player variable is 1 (last shot was a successful/not invalid one)
 			if (player == 1) {
 
+				//Run game with low-level Ai (Dumb Ai)
 //				while(computer == 0){
 //					computer = Bomb(playerNet, (random() % 10) + 1,((random() / 10) % 10) + 1);
 //				}
+				//Run game with high-level Ai (smart Ai)
 				guessIndex(playerNet);
+
+				//reset players shot
 				player = 0;
-				//computer = 0;
 				reDraw();
 
 			}
+			//If the cursor is moved, then update screen.
 			if(x != old_x || y != old_y){
 				reDraw();
 				old_x = x;
@@ -169,14 +212,16 @@ int main(void) {
 		case 2:
 			drawString("WELL PLAYED!", 10, 10);
 			drawString("You defended Östersjön from the Ryssland!", 10, 20);
+			//Convert int to string/char-array
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
-			drawString("Press ENTER to continue", 10, 50);
 			drawString(scorePlayerTemp, 146, 30);
+			drawString("Press ENTER to continue", 10, 50);
 
+			//If menu isn't this menu anymore
 			if(menu != 2){
-				highScore[turn] = scorePlayer;
-				turn++;
+				highScore[round] = scorePlayer;
+				round++;
 				clearScreen(COLOR_BLACK);
 			}
 			break;
@@ -184,27 +229,35 @@ int main(void) {
 			//MATCH FINISHED OPPONENT WON
 		case 3:
 			drawString("YOU DIED", 10, 10);
+			//Convert int to string/char-array
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
 			drawString(scorePlayerTemp, 146, 30);
 			drawString("Press ENTER to continue", 10, 50);
+
+			//If menu isn't this menu anymore
 			if(menu != 3){
 				clearScreen(COLOR_BLACK);
 			}
 			break;
-			//MATCH FINISHED OPPONENT WON
+			//MATCH FINISHED TIE
 		case 4:
 			drawString("WELL PLAYED!", 10, 10);
 			drawString("ITS A TIE", 10, 20);
+			//Convert int to string/char-array
 			sprintf(scorePlayerTemp, "%d", scorePlayer);
 			drawString("Your score was: ", 10, 30);
 			drawString(scorePlayerTemp, 146, 30);
 			drawString("Press ENTER to continue", 10, 50);
+
+			//If menu isn't this menu anymore
 			if(menu != 4){
 				clearScreen(COLOR_BLACK);
 			}
 			break;
+			//SHOW HIGHSCORE
 		case 5:
+			//Writes the last 10 scores stacked ontop of eachother
 			for(int i = 0; i < 10; i++){
 				sprintf(highTemp, "%d", highScore[i]);
 				sprintf(roundTemp, "%d", i+1);
@@ -215,11 +268,12 @@ int main(void) {
 			drawString("Game", 34, 10);
 			drawString("Score", 94, 10);
 			drawString("Press ESC to Exit", 10, 20+10*10+20);
+			//If menu isn't this menu anymore
 			if(menu != 5){
 				clearScreen(COLOR_BLACK);
 			}
 			break;
-
+		//If menu isn't a valid number
 		default:
 			break;
 
@@ -230,6 +284,9 @@ int main(void) {
 	}
 }
 
+/*
+ * Runs at the start of the program
+ */
 void setup() {
 	/*
 	 * Configure data direction for I/O devices
@@ -237,11 +294,10 @@ void setup() {
 	*BUTTONS_CONTROL = 0x1F;
 	initTimers_Clock();
 	initController_Clock();
+
 	/*
 	 * Draw initial screen
 	 */
-	//x = VGA_WIDTH / 2;
-	//y = VGA_HEIGHT / 2;
 	old_x = x;
 	old_y = y;
 	clearScreen(COLOR_BLACK);
@@ -272,15 +328,24 @@ void setup() {
 	 * Enable interrupts for processor
 	 */
 	enableMicroBlazeInterrupts();
+
+	/*
+	 * Enable interrupts from timer
+	 */
 	enableTimer1();
 
-
+	/*
+	 * Init playerNet
+	 */
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			playerNet[i][j] = 0;
 		}
 	}
 
+	/*
+	 * Init opponentNet
+	 */
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			opponentNet[i][j] = 0;
@@ -291,11 +356,17 @@ void setup() {
 
 }
 
+/*
+ * Draws everything from the game-screen
+ * Used to update the screen
+ */
 void reDraw(){
 	lifeOpponent = 16;
 	lifePlayer = 16;
-	scoreOpponent = 1000;
 	scorePlayer = 1000;
+	/*
+	 * Scans the nets and adjusts the scores and life of player and opponent
+	 */
 	for(int i = 1; i <= 10; i++){
 		for(int j = 1; j <= 10; j++){
 			if(opponentNet[i][j] == 3 || opponentNet[i][j] == 4){
@@ -307,23 +378,21 @@ void reDraw(){
 			if(opponentNet[i][j] == 2){
 				scorePlayer-=10;
 			}
-			if(playerNet[i][j] == 2){
-				scoreOpponent-=10;
-			}
 
 		}
 	}
 
-	//Guide
+	//Guide to what buttons can be pressed
 	drawString("Aim with the Arrows", 10, 10);
 	drawString("Fire with 'ENTER'", 10, 20);
 	drawString("Exit game with 'ESC'", 10, 30);
 	drawString("Reset game with 'R'", 10, 40);
 
+	//Visual for who the values and net belong to
 	drawString("PLAYER", 16, 130);
 	drawString("COMPUTER", (640 - 16 * 11), 130);
 
-	//Draw Life
+	//Draw Life for both player and opponent
 	drawSquare(16, 150, 160, 158, COLOR_BLACK);
 	drawSquare(620-16*8, 150, 620-16*4, 158, COLOR_BLACK);
 	sprintf(lifePlayerTemp, "%d", lifePlayer);
@@ -334,18 +403,18 @@ void reDraw(){
 	drawString(lifeOpponentTemp, 620-(16*7)+10, 150);
 
 
-	//Draw Scores
+	//Draw Score for player
 	drawSquare(321,90, 450, 98, COLOR_BLACK);
-//	drawSquare(620-16*8, 150, 620-16*4, 158, COLOR_BLACK);
 	sprintf(scorePlayerTemp, "%d", scorePlayer);
-//	sprintf(scoreOpponentTemp, "%d", scoreOpponent);
 	drawString("Score: ", 273, 90);
 	drawString(scorePlayerTemp, 321, 90);
-//	drawString("Score: ", (640 - 16 * 11), 150);
-//	drawString(scoreOpponentTemp, 620-(16*7)+10, 150);
-	unsigned char SWITCHABLE_COLOR = 0;
+
+	//Divider lines
 	drawSquare(318, 100, 320, 480, COLOR_WHITE);
 	drawSquare(0, 100, 639, 101, COLOR_WHITE);
+
+	//Switch the color of the missed missiles with the switch while in-game
+	unsigned char SWITCHABLE_COLOR = 0;
 	if(*SWITCHES_DATA != 0){
 		SWITCHABLE_COLOR = COLOR_RED;
 	}else{
@@ -353,21 +422,20 @@ void reDraw(){
 
 	}
 
-	//Rita spelarens spelplan
+	//Draws the players net
 	for (int i = 1; i < 11; i++) {
-
 		for (int j = 1; j < 11; j++) {
-			if (playerNet[i][j] == 0) {
+			if (playerNet[i][j] == 0) { //Neutral
 				drawTexture(16 * j - 16 + 16, //x
 						16 * i - 16 + 160, //y
 						TILE_NEUTRAL);
-			} else if (playerNet[i][j] == 1) {
+			} else if (playerNet[i][j] == 1) { //Boat
 				drawSquare(16 * j - 16 + 16, //x_start
 						16 * i - 16 + 160, //y_start
 						16 * j - 16 + 15 + 16, //x_end
 						16 * i - 16 + 15 + 160, //y_end
 						73);
-			} else if (playerNet[i][j] == 2) {
+			} else if (playerNet[i][j] == 2) {//Miss
 				drawTexture(16 * j - 16 + 16, //x
 						16 * i - 16 + 160, //y
 						TILE_NEUTRAL);
@@ -376,7 +444,7 @@ void reDraw(){
 						16 * j - 16 + 7 + 4 + 16, //x_end
 						16 * i - 16 + 7 + 4 + 160, //y_end
 						SWITCHABLE_COLOR);
-			} else if (playerNet[i][j] == 3) {
+			} else if (playerNet[i][j] == 3) {//Hit
 				drawSquare(16 * j - 16 + 16, //x_start
 						16 * i - 16 + 160, //y_start
 						16 * j - 16 + 15 + 16, //x_end
@@ -393,18 +461,18 @@ void reDraw(){
 		}
 	}
 
-	//Rita opponentens spelplan
+	//Draw the opponents net
 	for (int i = 1; i < 11; i++) {
 			for (int j = 1; j < 11; j++) {
-				if (opponentNet[i][j] == 0) { //Tom ruta
+				if (opponentNet[i][j] == 0) { //Neutral
 					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
 							16 * i - 16 + 160, //y
 							TILE_NEUTRAL);
-				} else if (opponentNet[i][j] == 1) { //Båt
+				} else if (opponentNet[i][j] == 1) { //Boat (Drawn the same as neutral)
 					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
 							16 * i - 16 + 160, //y
 							TILE_NEUTRAL);
-				} else if (opponentNet[i][j] == 2) { //missad ruta
+				} else if (opponentNet[i][j] == 2) { //Miss (Draws a small square over a neutral tile)
 					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
 							16 * i - 16 + 160, //y
 							TILE_NEUTRAL);
@@ -413,14 +481,14 @@ void reDraw(){
 							16 * j - 16 + 7 + 4 + (640 - 16 - 16*10), //x_end
 							16 * i - 16 + 7 + 4 + 160, //y_end
 							SWITCHABLE_COLOR);
-				} else if (opponentNet[i][j] == 3) { //träffad båt
+				} else if (opponentNet[i][j] == 3) { //Hit
 					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
 							16 * i - 16 + 160, //y_start
 							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
 							16 * i - 16 + 15 + 160, //y_end
 							COLOR_WHITE);
 
-				} else {
+				} else { //if the isn't a set type for a tile
 					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
 							16 * i - 16 + 160, //y_start
 							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
@@ -430,6 +498,9 @@ void reDraw(){
 			}
 		}
 
+	/*
+	 * Draw the cursor on the opponents net (Red square with no infill)
+	 */
 	for(int yy = 0; yy < 16; yy++){
 		for(int xx = 0; xx < 16; xx++){
 			if(yy == 0 || yy == 15 || xx == 0 || xx == 15   ){
@@ -439,7 +510,9 @@ void reDraw(){
 	}
 }
 
-/*returnerar heltal mellan 0 och max.(använde tiden från senaste knapptryckningen % något tills det blir mindre än max*/
+/*
+ * Returns INTs depending on the time since the start of the game (since the main menu opend)
+ */
 int random(){
 	int random = timeSinceStart%1000;
 //	if(random <0)
@@ -450,13 +523,16 @@ int random(){
 	return random;
 }
 
+/*
+ * Resets variables and nets between rounds
+ */
 void resetStats(){
+	x = 0;
+	y = 0;
 	scorePlayer = 1000;
-	scoreOpponent = 1000;
 	lifePlayer = 16;
 	lifeOpponent = 16;
 	player = 0;
-	computer = 0;
 
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
@@ -491,18 +567,26 @@ void initController_Clock() {
 void timer1ClockInterruptHandler() {
 
 	timeSinceStart++;
-	//displayNumber(timeSinceStart);
 	*TIMER1_CTRL|=(1<<8);
 
 	*IAR = 1 << TIMER1_IRQ;
 }
 
+/*
+ * Interrupts for the buttons on the FPGA
+ * Can be used as an alternative to the keyboard while a game is started
+ */
 void buttonsInterruptHandler() {
 	currentButtonsState = *BUTTONS_DATA;
+
+	//prevent bounceing
 	for (int d = 1; d <= 12500; d++) {
 		//EMPTY DELAY
 	}
+
+
 	if (currentButtonsState != prevButtonsState) {
+		//Middle button pressed - Same functions as ENTER
 		if (((currentButtonsState & MIDDLE)!= (prevButtonsState & MIDDLE)) && ((currentButtonsState & MIDDLE) != 0)){
 			if (menu == 1) {
 				if (opponentNet[x + 1][y + 1] == 0) {
@@ -526,6 +610,12 @@ void buttonsInterruptHandler() {
 				}
 			}
 		}
+
+		/*
+		 * UP, DOWN, LEFT, RIGHT buttons used as an alternative to
+		 * the arrows on the keyboard. They have the same functionality
+		 * when a game is started.
+		 */
 		if (((currentButtonsState & LEFT) != (prevButtonsState & LEFT)) && ((currentButtonsState & LEFT) != 0)){
 			if(x>0){
 				x--;
@@ -554,112 +644,125 @@ void buttonsInterruptHandler() {
 
 }
 
+/*
+ * Interrupts for the keyboard connected with USB to FPGA
+ */
 void keyboardInterruptHandler() {
 	// Read the newly received scan code
 	lastKeyCode = *KB_DATA;
-	int d;
-	for (d = 1; d <= 12500; d++) {
+
+	//prevent bounceing
+	for (int d = 1; d <= 12500; d++) {
 		//EMPTY DELAY
 	}
 	currentKeyCode = *KB_DATA;
 	if (lastKeyCode == currentKeyCode) {
 		// Check if any of the arrows where pressed
 		switch (currentKeyCode) {
-		// Scan code of up arrow is 0x75
-		case 0x75:
-			if(y>0){
-				y--;
-			}
-
-			break;
-			// Scan code of down arrow is 0x72
-		case 0x72:
-			if(y<9){
-				y++;
-			}
-
-			break;
-			// Scan code of right arrow is 0x74
-		case 0x74:
-			if(x<9){
-				x++;
-			}
-
-			break;
-			// Scan code of left arrow is 0x6B
-		case 0x6B:
-			if(x>0){
-				x--;
-			}
-			//x = random(10,65);
-			//y = random(10,36);
-			break;
-			//ENTER
-		case 0x5A:
-			if(menu == 0){
-				x = 0;
-				y = 0;
-				menu = 1;
-				resetStats();
-			}else if (menu == 1) {
-				if (opponentNet[y + 1][x + 1] == 0) {
-					scorePlayer -= 10;
+			// UP-ARROW
+			case 0x75:
+				if(y>0){
+					y--;
 				}
-				if (player == 0){
-					player = Bomb(opponentNet, x + 1, y + 1);
-					if(opponentNet[y + 1][x + 1] == 3 || opponentNet[y + 1][x + 1] == 4){
-						*LED_DATA = 0xFFFF;
-						for (int d = 1; d <= 30000; d++) {
-							//EMPTY DELAY
+
+				break;
+				// DOWN-ARROW
+			case 0x72:
+				if(y<9){
+					y++;
+				}
+
+				break;
+				// RIGHT-ARROW
+			case 0x74:
+				if(x<9){
+					x++;
+				}
+
+				break;
+				// LEFT-ARROW
+			case 0x6B:
+				if(x>0){
+					x--;
+				}
+				//x = random(10,65);
+				//y = random(10,36);
+				break;
+				//ENTER
+			case 0x5A:
+				//If current menu is 0, then run this code (change menu to 1)
+				if(menu == 0){
+					menu = 1;
+					resetStats();
+				}
+				//If current menu is 1 (game) change functionality of enter from select to fire missile.
+				else if (menu == 1) {
+					//if the player hasn't shot a valid missile
+					if (player == 0){
+						//try to shoot
+						player = Bomb(opponentNet, x + 1, y + 1);
+						//If its a hit then flash leds on FPGA
+						if(opponentNet[y + 1][x + 1] == 3 || opponentNet[y + 1][x + 1] == 4){
+							*LED_DATA = 0xFFFF;
+							for (int d = 1; d <= 30000; d++) {
+								//EMPTY DELAY
+							}
+							*LED_DATA = 0x0000;
 						}
-						*LED_DATA = 0x0000;
+					}
+
+					reDraw();
+
+					/*
+					 * Check if anyone has died
+					 */
+					if(lifePlayer <= 0 && lifeOpponent <= 0){
+						clearScreen(COLOR_BLACK);
+						menu = 4;
+					}else if(lifePlayer <= 0){
+						clearScreen(COLOR_BLACK);
+						menu = 3;
+					}else if(lifeOpponent <= 0){
+						clearScreen(COLOR_BLACK);
+						menu = 2;
 					}
 				}
-
-				reDraw();
-
-				if(lifePlayer <= 0 && lifeOpponent <= 0){
-					clearScreen(COLOR_BLACK);
-					menu = 4;
-				}else if(lifePlayer <= 0){
-					clearScreen(COLOR_BLACK);
-					menu = 3;
-				}else if(lifeOpponent <= 0){
-					clearScreen(COLOR_BLACK);
-					menu = 2;
+				//If enter pressed in menu 2,3,4 then go to menu 0
+				else if(menu == 2||menu == 3||menu == 4){
+					menu = 0;
 				}
-			}else if(menu == 2||menu == 3||menu == 4){
-				menu = 0;
-			}
 
-			break;
-			//ESC
-		case 0x76:
-			if(menu == 1){
-				menu = 0;
-				clearScreen(COLOR_BLACK);
+				break;
+				//ESC
+			case 0x76:
+				//if ESC pressed in game then exit game by going to Main menu (menu 0)
+				if(menu == 1){
+					menu = 0;
+					clearScreen(COLOR_BLACK);
+				//if ESC pressed in highscore-menu (menu 5) then go to main menu (menu 0)
+				}else if(menu == 5){
+					menu = 0;
+				}
 
-			}else if(menu == 5){
-				menu = 0;
+				break;
+				//R
+			case 0x2d:
+				//reset game if pressed in the game-menu (menu 1)
+				if(menu == 1){
+					clearScreen(COLOR_BLACK);
+					resetStats();
+				}
+				break;
+				//H
+			case 0x33:
+				//Go to highscore-menu if H is pressed in main menu (menu 0)
+				if(menu == 0){
+					menu = 5;
+				}
+				break;
+			default:
+				break;
 			}
-
-			break;
-			//R
-		case 0x2d:
-			if(menu == 1){
-				clearScreen(COLOR_BLACK);
-				resetStats();
-			}
-			break;
-		case 0x33:
-			if(menu == 0){
-				menu = 5;
-			}
-			break;
-		default:
-			break;
-		}
-		bounceCounter++;
 	}
 	// Acknowledge the interrupt
 	*KB_CTRL |= (1 << 2);
