@@ -56,6 +56,7 @@ unsigned int currentKeyCode = 0;
 unsigned int lastKeyCode = 0;
 
 unsigned char menu = 0;
+char player = 0;
 
 unsigned int scorePlayer = 1000;
 unsigned int scoreOpponent = 1000;
@@ -77,7 +78,7 @@ void keyboardInterruptHandler() __attribute__((fast_interrupt));
 void timer1ClockInterruptHandler() __attribute__((fast_interrupt));
 
 void setup();
-int random(int max,int seed);
+int random();
 
 int main(void) {
 	setup();
@@ -92,12 +93,12 @@ int main(void) {
 		case 0:
 
 			drawString("Welcome to BATTLESHIPS!", 10, 10);
-			drawString("Are YOU ready for the challange of your life?", 10, 20);
+			drawString("Are YOU ready for the challenge of your life?", 10, 20);
 			drawString("GOOD! Press ENTER to START!", 10, 30);
 
 			drawString("Made by", 0, 460);
 			drawString("Simon, Oskar, Victor, Richard", 0, 470);
-			if(menu != 0){
+			if (menu != 0) {
 				clearScreen(COLOR_BLACK);
 				placeBoard(playerNet);
 				placeBoard(opponentNet);
@@ -107,15 +108,19 @@ int main(void) {
 
 			//GAME
 		case 1:
+			if (player == 1) {
 
+				Bomb(playerNet, (random() % 10) + 1,
+						((random() / 10) % 10) + 1);
+				player = 0;
+				reDraw();
 
-			if(x != old_x || y != old_y){
+			}
+			if (x != old_x || y != old_y) {
 				reDraw();
 				old_x = x;
 				old_y = y;
 			}
-
-
 
 			break;
 
@@ -181,7 +186,6 @@ void setup() {
 	enableMicroBlazeInterrupts();
 	enableTimer1();
 
-
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			playerNet[i][j] = 0;
@@ -194,13 +198,11 @@ void setup() {
 		}
 	}
 
-
-
 }
 
-void reDraw(){
+void reDraw() {
 	drawSquare(16, 150, 160, 158, COLOR_BLACK);
-	drawSquare(620-16*8, 150, 620-16*4, 158, COLOR_BLACK);
+	drawSquare(620 - 16 * 8, 150, 620 - 16 * 4, 158, COLOR_BLACK);
 	sprintf(scorePlayerTemp, "%d", scorePlayer);
 	sprintf(scoreOpponentTemp, "%d", scoreOpponent);
 
@@ -208,7 +210,7 @@ void reDraw(){
 	drawString("Score: ", 16, 150);
 	drawString(scorePlayerTemp, 70, 150);
 	drawString("Score: ", (640 - 16 * 11), 150);
-	drawString(scoreOpponentTemp, 620-(16*7)+10, 150);
+	drawString(scoreOpponentTemp, 620 - (16 * 7) + 10, 150);
 
 	drawSquare(319, 100, 320, 480, COLOR_WHITE);
 	drawSquare(0, 100, 639, 101, COLOR_WHITE);
@@ -219,108 +221,108 @@ void reDraw(){
 		for (int j = 1; j < 11; j++) {
 			if (playerNet[i][j] == 0) {
 				drawTexture(16 * j - 16 + 16, //x
-						16 * i - 16 + 160, //y
-						TILE_NEUTRAL);
+				16 * i - 16 + 160, //y
+				TILE_NEUTRAL);
 			} else if (playerNet[i][j] == 1) {
 				drawSquare(16 * j - 16 + 16, //x_start
-						16 * i - 16 + 160, //y_start
-						16 * j - 16 + 15 + 16, //x_end
-						16 * i - 16 + 15 + 160, //y_end
-						73);
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + 16, //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				73);
 			} else if (playerNet[i][j] == 2) {
 				drawSquare(16 * j - 16 + 16, //x_start
-						16 * i - 16 + 160, //y_start
-						16 * j - 16 + 15 + 16, //x_end
-						16 * i - 16 + 15 + 160, //y_end
-						COLOR_YELLOW);
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + 16, //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				COLOR_YELLOW);
 			} else if (playerNet[i][j] == 3) {
 				drawSquare(16 * j - 16 + 16, //x_start
-						16 * i - 16 + 160, //y_start
-						16 * j - 16 + 15 + 16, //x_end
-						16 * i - 16 + 15 + 160, //y_end
-						COLOR_WHITE);
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + 16, //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				COLOR_WHITE);
 
 			} else {
 				drawSquare(16 * j - 16 + 16, //x_start
-						16 * i - 16 + 160, //y_start
-						16 * j - 16 + 15 + 16, //x_end
-						16 * i - 16 + 15 + 160, //y_end
-						COLOR_GREEN);
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + 16, //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				COLOR_GREEN);
 			}
 		}
 	}
 
 	//Rita opponentens spelplan
 	for (int i = 1; i < 11; i++) {
-			for (int j = 1; j < 11; j++) {
-				if (opponentNet[i][j] == 0) {
-					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
-							16 * i - 16 + 160, //y
-							TILE_NEUTRAL);
-				} else if (opponentNet[i][j] == 1) {
-					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
-							16 * i - 16 + 160, //y
-							TILE_NEUTRAL);
-				} else if (opponentNet[i][j] == 2) {
-					drawTexture(16 * j - 16 + (640 - 16 - 16*10), //x
-							16 * i - 16 + 160, //y
-							TILE_NEUTRAL);
-					drawSquare(16 * j - 16 + (640 - 16 - 16*10)+4, //x_start
-							16 * i - 16 + 160+4, //y_start
-							16 * j - 16 + 7 + 4 + (640 - 16 - 16*10), //x_end
-							16 * i - 16 + 7 + 4 + 160, //y_end
-							COLOR_YELLOW);
-				} else if (opponentNet[i][j] == 3) {
-					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
-							16 * i - 16 + 160, //y_start
-							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
-							16 * i - 16 + 15 + 160, //y_end
-							COLOR_WHITE);
+		for (int j = 1; j < 11; j++) {
+			if (opponentNet[i][j] == 0) {
+				drawTexture(16 * j - 16 + (640 - 16 - 16 * 10), //x
+				16 * i - 16 + 160, //y
+				TILE_NEUTRAL);
+			} else if (opponentNet[i][j] == 1) {
+				drawTexture(16 * j - 16 + (640 - 16 - 16 * 10), //x
+				16 * i - 16 + 160, //y
+				TILE_NEUTRAL);
+			} else if (opponentNet[i][j] == 2) {
+				drawTexture(16 * j - 16 + (640 - 16 - 16 * 10), //x
+				16 * i - 16 + 160, //y
+				TILE_NEUTRAL);
+				drawSquare(16 * j - 16 + (640 - 16 - 16 * 10) + 4, //x_start
+				16 * i - 16 + 160 + 4, //y_start
+				16 * j - 16 + 7 + 4 + (640 - 16 - 16 * 10), //x_end
+				16 * i - 16 + 7 + 4 + 160, //y_end
+				COLOR_YELLOW);
+			} else if (opponentNet[i][j] == 3) {
+				drawSquare(16 * j - 16 + (640 - 16 - 16 * 10), //x_start
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + (640 - 16 - 16 * 10), //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				COLOR_WHITE);
 
-				} else {
-					drawSquare(16 * j - 16 + (640 - 16 - 16*10), //x_start
-							16 * i - 16 + 160, //y_start
-							16 * j - 16 + 15 + (640 - 16 - 16*10), //x_end
-							16 * i - 16 + 15 + 160, //y_end
-							COLOR_GREEN);
-				}
+			} else {
+				drawSquare(16 * j - 16 + (640 - 16 - 16 * 10), //x_start
+				16 * i - 16 + 160, //y_start
+				16 * j - 16 + 15 + (640 - 16 - 16 * 10), //x_end
+				16 * i - 16 + 15 + 160, //y_end
+				COLOR_GREEN);
 			}
 		}
+	}
 
-	for(int yy = 0; yy < 16; yy++){
-		for(int xx = 0; xx < 16; xx++){
-			if(yy == 0 || yy == 15 || xx == 0 || xx == 15   ){
-				drawPixel(xx+x*16 + (640 - 16 - 16*10), yy+y*16 + 160, COLOR_RED);
+	for (int yy = 0; yy < 16; yy++) {
+		for (int xx = 0; xx < 16; xx++) {
+			if (yy == 0 || yy == 15 || xx == 0 || xx == 15) {
+				drawPixel(xx + x * 16 + (640 - 16 - 16 * 10), yy + y * 16 + 160,
+				COLOR_RED);
 			}
 		}
 	}
 }
 
 /*returnerar heltal mellan 0 och max.(använde tiden från senaste knapptryckningen % något tills det blir mindre än max*/
-int random(int max,int seed){
-	int random = timeSinceStart*7*seed;
-	if(random <0)
-		random*=-1;
-	do{
-		random %= 10;
-	}while(random < 0 || random > max);
+int random() {
+	int random = timeSinceStart % 1000;
+//	if(random <0)
+//		random*=-1;
+//	do{
+//		random %= 10;
+//	}while(random < 0 || random > max);
 	return random;
 }
 
 void initTimers_Clock() {
 	*TIMER1_LOAD = 359;
-	*TIMER1_CTRL =(1<<8)|(1<<6)|(1<<5)|(1<<4)|(1<<1);
+	*TIMER1_CTRL = (1 << 8) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 1);
 
 }
 
 void enableTimer1() {
-	*TIMER1_CTRL=(*TIMER1_CTRL|(1<<7))&(~(1<<5));
+	*TIMER1_CTRL = (*TIMER1_CTRL | (1 << 7)) & (~(1 << 5));
 
 }
 
 void initController_Clock() {
-	*IER|=0b110;
-
+	*IER |= 0b110;
 
 }
 
@@ -328,7 +330,7 @@ void timer1ClockInterruptHandler() {
 
 	timeSinceStart++;
 	//displayNumber(timeSinceStart);
-	*TIMER1_CTRL|=(1<<8);
+	*TIMER1_CTRL |= (1 << 8);
 
 	*IAR = 1 << TIMER1_IRQ;
 }
@@ -357,58 +359,70 @@ void keyboardInterruptHandler() {
 		switch (currentKeyCode) {
 		// Scan code of up arrow is 0x75
 		case 0x75:
-			if(y>0){
+			if (y > 0) {
 				y--;
 			}
 
 			break;
 			// Scan code of down arrow is 0x72
 		case 0x72:
-			if(y<9){
+			if (y < 9) {
 				y++;
 			}
 
 			break;
 			// Scan code of right arrow is 0x74
 		case 0x74:
-			if(x<9){
+			if (x < 9) {
 				x++;
 			}
 
 			break;
 			// Scan code of left arrow is 0x6B
 		case 0x6B:
-			if(x>0){
+			if (x > 0) {
 				x--;
 			}
 			//x = random(10,65);
 			//y = random(10,36);
 			break;
 		case 0x5A:
-			if(menu == 0){
+			if (menu == 0) {
 				x = 0;
 				y = 0;
 				menu = 1;
-			}else if(menu == 1){
-				if(opponentNet[x+1][y+1] == 0){
+			} else if (menu == 1) {
+				if (opponentNet[x + 1][y + 1] == 0) {
 					scorePlayer -= 10;
 				}
-				Bomb(opponentNet, x+1, y+1);
-				if(playerNet[x+1][y+1] == 0){
-					scoreOpponent -= 10;
-				}
-				Bomb(playerNet, x+1, y+1);
+				if (player == 0) {
 
+					player = Bomb(opponentNet, x + 1, y + 1);
+					if (playerNet[x + 1][y + 1] == 0) {
+						scoreOpponent -= 10;
+					}
+				}
 
 				reDraw();
 			}
 
 			break;
 		case 0x76:
-			if(menu == 1){
+			if (menu == 1) {
 				menu = 0;
 				clearScreen(COLOR_BLACK);
 				scorePlayer = 1000;
+				for (int i = 0; i < 12; i++) {
+					for (int j = 0; j < 12; j++) {
+						playerNet[i][j] = 0;
+					}
+				}
+
+				for (int i = 0; i < 12; i++) {
+					for (int j = 0; j < 12; j++) {
+						opponentNet[i][j] = 0;
+					}
+				}
 			}
 
 			break;

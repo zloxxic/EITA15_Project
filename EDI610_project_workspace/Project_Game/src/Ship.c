@@ -7,6 +7,8 @@
 
 #include "ship.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include "displays.h"
 extern timeSinceStart;
 
 
@@ -55,7 +57,7 @@ char Ship_place(Ship* self, int m[12][12]) {
 			for (int k = self->y; k > (self->y - self->seg); k--) {
 				for (int i = k - 1; i <= k + 1; i++) {
 					for (int j = self->x - 1; j <= self->x + 1; j++) {
-						if (m[j][i] != 0) {
+						if (m[i][j] != 0) {
 							return 0;
 						}
 					}
@@ -139,24 +141,20 @@ void placeBoard(int m[12][12]) {
 	int nbr2 = 3;
 	int slump_x, slump_y, slump_dir;
 	int temp = timeSinceStart;
-	srand(temp);
 	while (nbr4 > 0) {
-//		slump_x = random(9,47)+1;
-//		//timeSinceStart /= 7;
-//		temp = timeSinceStart;
-//		slump_y = random(9,31)+1;
-//		//timeSinceStart /= 7;
-//		temp = timeSinceStart;
-//		slump_dir = random(3,84);
-		//srand((unsigned) time(&t));
+		slump_x = (random()%10)+1;
+		slump_y = ((random()/10)%10)+1;
+		slump_dir = random()%4;
 
-		slump_x = (rand() % 10) + 1;
-		slump_y = (rand() % 10) + 1;
-		slump_dir = rand() % 4;
 		Ship* tempShip = Ship_create(slump_x, slump_y, 4, slump_dir);
+//		displayDigitAtIndex(0, tempShip->x);
+//		displayDigitAtIndex(1, tempShip->y);
+		displayDigitAtIndex(0, tempShip->dir);
+
 		char tempel = Ship_place(tempShip, m);
 		if (tempel == 1) {
 			nbr4--;
+			Ship_destroy(tempShip);
 		} else {
 			Ship_destroy(tempShip);
 		}
@@ -164,18 +162,14 @@ void placeBoard(int m[12][12]) {
 		temp = timeSinceStart;
 	}
 	while (nbr3 > 0) {
-//		slump_x = random(9,37)+1;
-//		//timeSinceStart /= 7;
-//		slump_y = random(9,34)+1;
-//		//timeSinceStart /= 7;
-//		temp = timeSinceStart;
-//		slump_dir = 1;
-		//srand((unsigned) time(&t));
+		slump_x = (random()%10)+1;
+		slump_y = ((random()/10)%10)+1;
+		slump_dir = random()%4;
 
-		slump_x = (rand() % 10) + 1;
-		slump_y = (rand() % 10) + 1;
-		slump_dir = rand() % 4;
 		Ship* tempShip = Ship_create(slump_x, slump_y, 3, slump_dir);
+		displayDigitAtIndex(1, tempShip->dir);
+		displayDigitAtIndex(2, tempShip->x);
+		displayDigitAtIndex(3, tempShip->y);
 		char tempel = Ship_place(tempShip, m);
 		if (tempel == 1) {
 			nbr3--;
@@ -186,17 +180,14 @@ void placeBoard(int m[12][12]) {
 		temp = timeSinceStart;
 	}
 	while (nbr2 > 0) {
-//		slump_x = random(9,14)+1;
-//		//timeSinceStart %= 7;
-//		slump_y = random(9,5)+1;
-//		//timeSinceStart %= 7;
-//		slump_dir = random(3,23);
-		//srand((unsigned) time(&t));
+		slump_x = (random()%10)+1;
+		slump_y = ((random()/10)%10)+1;
+		slump_dir = random()%4;
 
-		slump_x = (rand() % 10) + 1;
-		slump_y = (rand() % 10) + 1;
-		slump_dir = rand() % 4;
 		Ship* tempShip = Ship_create(slump_x, slump_y, 2, slump_dir);
+		displayDigitAtIndex(4, tempShip->dir);
+		displayDigitAtIndex(5, tempShip->x);
+		displayDigitAtIndex(6, tempShip->y);
 		char tempel = Ship_place(tempShip, m);
 		if (tempel == 1) {
 			nbr2--;
@@ -209,11 +200,19 @@ void placeBoard(int m[12][12]) {
 }
 /** Markerar [x][y] och sedan ska man kunna styra med piltangenterna för att öka/minska x/y. trycka enter för att bomba och om
  värdet är en 1:a i matrisplatsen ska värdet ändras till en 2:a, ifall hela båten är sprängd ska värdena ändras till 3:or*/
-void Bomb(int m[12][12], int x, int y) {
+char Bomb(int m[12][12], int x, int y) {
 	if (m[y][x] == 0) {
 		m[y][x] = 2;
+		return 1;
 	} else if (m[y][x] == 1) {
 		m[y][x] = 3;
+		checkIfBlown(m,x,y);
+		return 1;
+	} else if (m[y][x]==3){
+		return 0;
 	}
+	return 0;
+}
+void checkIfBlown(int m[12][12], int x, int y){
 
 }
