@@ -279,8 +279,6 @@ int main(void) {
 
 		}
 
-		//drawString("GAME OVER", 270, 200, charMap);
-		//drawTexture(0,0,TILE_NEUTRAL);
 	}
 }
 
@@ -511,15 +509,10 @@ void reDraw(){
 }
 
 /*
- * Returns INTs depending on the time since the start of the game (since the main menu opend)
+ * Returns INTs depending on the time since the start of the game (since the main menu opened)
  */
 int random(){
 	int random = timeSinceStart%1000;
-//	if(random <0)
-//		random*=-1;
-//	do{
-//		random %= 10;
-//	}while(random < 0 || random > max);
 	return random;
 }
 
